@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"errors"
-	"github.com/aerosystems/user-service/internal/handlers"
+	"github.com/aerosystems/user-service/internal/services"
 	echojwt "github.com/labstack/echo-jwt/v4"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
 	"strings"
@@ -15,7 +16,7 @@ func AuthTokenMiddleware(roles []string) echo.MiddlewareFunc {
 		SigningKey:     []byte(os.Getenv("ACCESS_SECRET")),
 		ParseTokenFunc: parseToken,
 		ErrorHandler: func(c echo.Context, err error) error {
-			return handlers.ErrorResponse(c, http.StatusUnauthorized, "invalid token", err)
+			return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 		},
 	}
 
@@ -26,7 +27,6 @@ func AuthTokenMiddleware(roles []string) echo.MiddlewareFunc {
 				return AuthorizationConfig.ErrorHandler(c, errors.New("missing Authorization header"))
 			}
 
-			// Token should be in the form "Bearer <token>"
 			tokenParts := strings.Split(authHeader, " ")
 			if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
 				return AuthorizationConfig.ErrorHandler(c, errors.New("invalid token format"))
@@ -34,7 +34,7 @@ func AuthTokenMiddleware(roles []string) echo.MiddlewareFunc {
 
 			token := tokenParts[1]
 
-			accessTokenClaims, err := TokenService.DecodeAccessToken(token)
+			accessTokenClaims, err := services.DecodeAccessToken(token)
 			if err != nil {
 				return AuthorizationConfig.ErrorHandler(c, err)
 			}
@@ -43,7 +43,6 @@ func AuthTokenMiddleware(roles []string) echo.MiddlewareFunc {
 				return AuthorizationConfig.ErrorHandler(c, errors.New("token expired"))
 			}
 
-			// Перевірка, чи userRole знаходиться у переданому масиві roles
 			roleFound := false
 			for _, role := range roles {
 				if accessTokenClaims.UserRole == role {
@@ -53,8 +52,7 @@ func AuthTokenMiddleware(roles []string) echo.MiddlewareFunc {
 			}
 
 			if !roleFound {
-				// Якщо userRole не входить у roles, повертаємо помилку 403
-				return handlers.ErrorResponse(c, http.StatusForbidden, "forbidden", errors.New("userRole not allowed"))
+				return echo.NewHTTPError(http.StatusForbidden, "access denied")
 			}
 
 			return next(c)
@@ -64,7 +62,7 @@ func AuthTokenMiddleware(roles []string) echo.MiddlewareFunc {
 
 func parseToken(c echo.Context, auth string) (interface{}, error) {
 	_ = c
-	accessTokenClaims, err := TokenService.DecodeAccessToken(auth)
+	accessTokenClaims, err := services.DecodeAccessToken(auth)
 	if err != nil {
 		return nil, err
 	}

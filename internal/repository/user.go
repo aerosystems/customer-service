@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"github.com/aerosystems/user-service/internal/models"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -23,9 +22,9 @@ func (r *UserRepo) FindAll() (*[]models.User, error) {
 	return &users, nil
 }
 
-func (r *UserRepo) FindByID(ID int) (*models.User, error) {
+func (r *UserRepo) FindById(Id uint) (*models.User, error) {
 	var user models.User
-	result := r.db.Find(&user, ID)
+	result := r.db.Find(&user, Id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -35,15 +34,21 @@ func (r *UserRepo) FindByID(ID int) (*models.User, error) {
 func (r *UserRepo) FindByEmail(Email string) (*models.User, error) {
 	var user models.User
 	result := r.db.Where("email = ?", Email).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &user, nil
 }
 
-func (r *UserRepo) FindByGoogleID(GoogleID string) (*models.User, error) {
+func (r *UserRepo) FindByGoogleId(GoogleId string) (*models.User, error) {
 	var user models.User
-	result := r.db.Where("google_id = ?", GoogleID).First(&user)
+	result := r.db.Where("google_id = ?", GoogleId).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -72,36 +77,4 @@ func (r *UserRepo) Delete(user *models.User) error {
 		return result.Error
 	}
 	return nil
-}
-
-// ResetPassword is the method we will use to change a user's password.
-func (r *UserRepo) ResetPassword(user *models.User, password string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		return err
-	}
-	user.Password = string(hashedPassword)
-	result := r.db.Save(&user)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
-
-// PasswordMatches uses Go's bcrypt package to compare a user supplied password
-// with the hash we have stored for a given user in the database. If the password
-// and hash match, we return true; otherwise, we return false.
-func (r *UserRepo) PasswordMatches(user *models.User, plainText string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(plainText))
-	if err != nil {
-		switch {
-		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
-			// invalid password
-			return false, nil
-		default:
-			return false, err
-		}
-	}
-
-	return true, nil
 }

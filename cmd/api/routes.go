@@ -14,5 +14,7 @@ func (app *Config) NewRouter() *echo.Echo {
 	docsGroup.Use(middleware.BasicAuthMiddleware)
 	docsGroup.GET("/*", echoSwagger.WrapHandler)
 
+	e.GET("/v1/users", app.baseHandler.GetUser, middleware.AuthTokenMiddleware([]string{"user", "support", "admin"}))
+
 	return e
 }

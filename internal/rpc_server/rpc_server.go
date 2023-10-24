@@ -26,7 +26,7 @@ func NewUserServer(
 	}
 }
 
-func (ss *UserServer) Listen(rpcPort int) error {
+func (us *UserServer) Listen(rpcPort int) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", rpcPort))
 	if err != nil {
 		return err

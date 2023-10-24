@@ -3,5 +3,11 @@ package main
 import "github.com/aerosystems/user-service/internal/handlers"
 
 type Config struct {
-	BaseHandler *handlers.BaseHandler
+	baseHandler *handlers.BaseHandler
+}
+
+func NewApp(baseHandler *handlers.BaseHandler) *Config {
+	return &Config{
+		baseHandler: baseHandler,
+	}
 }

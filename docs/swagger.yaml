@@ -1,4 +1,28 @@
 basePath: /
+definitions:
+  handlers.ErrResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  handlers.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+    type: object
 host: gw.verifire.com/user
 info:
   contact:
@@ -10,7 +34,41 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   title: User Service
   version: 1.0.0
-paths: {}
+paths:
+  /v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Get user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handlers.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user
+      tags:
+      - users
 schemes:
 - https
 securityDefinitions:

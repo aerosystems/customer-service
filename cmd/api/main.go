@@ -42,19 +42,19 @@ func main() {
 	log := logger.NewLogger(os.Getenv("HOSTNAME"))
 
 	clientGORM := GormPostgres.NewClient(logrus.NewEntry(log.Logger))
-	_ = clientGORM.AutoMigrate(models.User{})
+	if err := clientGORM.AutoMigrate(models.User{}); err != nil {
+		log.Fatal(err)
+	}
 
 	userRepo := repository.NewUserRepo(clientGORM)
 
 	userService := services.NewUserServiceImpl(userRepo)
 
-	baseHandler := handlers.NewBaseHandler(userService)
+	baseHandler := handlers.NewBaseHandler(os.Getenv("APP_ENV"), log.Logger, userService)
+
 	rpcServer := RPCServer.NewUserServer(rpcPort, log.Logger, userService)
 
-	app := Config{
-		BaseHandler: baseHandler,
-	}
-
+	app := NewApp(baseHandler)
 	e := app.NewRouter()
 	middleware.AddMiddleware(e, log.Logger)
 
