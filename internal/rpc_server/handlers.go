@@ -38,8 +38,8 @@ func (us *UserServer) ResetPassword(payload UserRPCPayload, result *string) erro
 	return us.userService.ResetPassword(user.Id, payload.PasswordHash)
 }
 
-func (us *UserServer) ActivateUser(user *UserRPCPayload, result *string) error {
-	return us.userService.ActivateUser(user.UserId)
+func (us *UserServer) ActivateUser(userId uint, result *string) error {
+	return us.userService.ActivateUser(userId)
 }
 
 func (us *UserServer) MatchPassword(payload UserRPCPayload, result *bool) error {

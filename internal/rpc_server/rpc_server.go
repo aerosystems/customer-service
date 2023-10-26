@@ -32,7 +32,6 @@ func (us *UserServer) Listen(rpcPort int) error {
 		return err
 	}
 	defer listen.Close()
-
 	for {
 		rpcConn, err := listen.Accept()
 		if err != nil {
