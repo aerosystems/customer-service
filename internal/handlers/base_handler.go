@@ -11,15 +11,13 @@ type BaseHandler struct {
 	mode        string
 	log         *logrus.Logger
 	userService services.UserService
-	codeService services.CodeService
 }
 
-func NewBaseHandler(mode string, log *logrus.Logger, userService services.UserService, codeService services.CodeService) *BaseHandler {
+func NewBaseHandler(mode string, log *logrus.Logger, userService services.UserService) *BaseHandler {
 	return &BaseHandler{
 		mode:        mode,
 		log:         log,
 		userService: userService,
-		codeService: codeService,
 	}
 }
 

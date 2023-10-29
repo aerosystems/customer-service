@@ -14,10 +14,7 @@ func (app *Config) NewRouter() *echo.Echo {
 	docsGroup.Use(middleware.BasicAuthMiddleware)
 	docsGroup.GET("/*", echoSwagger.WrapHandler)
 
-	e.POST("/v1/register", app.baseHandler.Register)
-	e.POST("/v1/confirm", app.baseHandler.Confirm)
-	e.POST("/v1/reset-password", app.baseHandler.ResetPassword)
-	e.GET("/v1/users", app.baseHandler.GetUser, middleware.AuthTokenMiddleware([]string{"user", "support", "admin"}))
+	e.GET("/v1/users", app.baseHandler.GetUser, middleware.AuthTokenMiddleware([]string{"customer", "support", "admin"}))
 
 	return e
 }
