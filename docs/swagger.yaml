@@ -1,13 +1,5 @@
 basePath: /
 definitions:
-  handlers.ErrResponse:
-    properties:
-      code:
-        type: integer
-      data: {}
-      message:
-        type: string
-    type: object
   handlers.Response:
     properties:
       data: {}
@@ -55,15 +47,15 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrResponse'
+            $ref: '#/definitions/handlers.Response'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/handlers.ErrResponse'
+            $ref: '#/definitions/handlers.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrResponse'
+            $ref: '#/definitions/handlers.Response'
       security:
       - BearerAuth: []
       summary: Get user

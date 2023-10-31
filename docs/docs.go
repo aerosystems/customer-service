@@ -62,19 +62,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrResponse"
+                            "$ref": "#/definitions/handlers.Response"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrResponse"
+                            "$ref": "#/definitions/handlers.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrResponse"
+                            "$ref": "#/definitions/handlers.Response"
                         }
                     }
                 }
@@ -82,18 +82,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.ErrResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "data": {},
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "handlers.Response": {
             "type": "object",
             "properties": {
