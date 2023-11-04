@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/aerosystems/user-service/internal/services"
+	"github.com/aerosystems/customer-service/internal/services"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-// GetUser godoc
+// GetCustomer godoc
 // @Summary Get user
 // @Description Get user
 // @Tags users
@@ -18,7 +18,7 @@ import (
 // @Failure 403 {object} Response
 // @Failure 500 {object} Response
 // @Router /v1/users [get]
-func (h *BaseHandler) GetUser(c echo.Context) error {
+func (h *BaseHandler) GetCustomer(c echo.Context) error {
 	accessTokenClaims := c.Get("accessTokenClaims").(services.AccessTokenClaims)
 	user, err := h.userService.GetUserById(uint(accessTokenClaims.UserId))
 	if err != nil {

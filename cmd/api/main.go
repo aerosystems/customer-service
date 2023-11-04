@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/aerosystems/user-service/internal/handlers"
-	"github.com/aerosystems/user-service/internal/middleware"
-	"github.com/aerosystems/user-service/internal/models"
-	"github.com/aerosystems/user-service/internal/repository"
-	RPCServer "github.com/aerosystems/user-service/internal/rpc_server"
-	"github.com/aerosystems/user-service/internal/services"
-	GormPostgres "github.com/aerosystems/user-service/pkg/gorm_postgres"
-	"github.com/aerosystems/user-service/pkg/logger"
+	"github.com/aerosystems/customer-service/internal/handlers"
+	"github.com/aerosystems/customer-service/internal/middleware"
+	"github.com/aerosystems/customer-service/internal/models"
+	"github.com/aerosystems/customer-service/internal/repository"
+	RPCServer "github.com/aerosystems/customer-service/internal/rpc_server"
+	"github.com/aerosystems/customer-service/internal/services"
+	GormPostgres "github.com/aerosystems/customer-service/pkg/gorm_postgres"
+	"github.com/aerosystems/customer-service/pkg/logger"
 	"github.com/sirupsen/logrus"
 	"net/rpc"
 	"os"
@@ -20,9 +20,9 @@ const (
 	rpcPort = 5001
 )
 
-// @title User Service
+// @title Customer Service
 // @version 1.0.0
-// @description A part of microservice infrastructure, who responsible for user entity.
+// @description A part of microservice infrastructure, who responsible for customer user entity.
 
 // @contact.name Artem Kostenko
 // @contact.url https://github.com/aerosystems
@@ -35,20 +35,20 @@ const (
 // @name Authorization
 // @description Should contain Access JWT Token, with the Bearer started
 
-// @host gw.verifire.com/user
+// @host gw.verifire.com/customer
 // @schemes https
 // @BasePath /
 func main() {
 	log := logger.NewLogger(os.Getenv("HOSTNAME"))
 
 	clientGORM := GormPostgres.NewClient(logrus.NewEntry(log.Logger))
-	if err := clientGORM.AutoMigrate(models.User{}); err != nil {
+	if err := clientGORM.AutoMigrate(models.Customer{}); err != nil {
 		log.Fatal(err)
 	}
 
-	userRepo := repository.NewUserRepo(clientGORM)
+	customerRepo := repository.NewCustomerRepo(clientGORM)
 
-	userService := services.NewUserServiceImpl(userRepo)
+	userService := services.NewUserServiceImpl(customerRepo)
 
 	baseHandler := handlers.NewBaseHandler(os.Getenv("APP_ENV"), log.Logger, userService)
 
@@ -61,12 +61,12 @@ func main() {
 	errChan := make(chan error)
 
 	go func() {
-		log.Infof("starting user-service HTTP server on port %d\n", webPort)
+		log.Infof("starting customer-service HTTP server on port %d\n", webPort)
 		errChan <- e.Start(fmt.Sprintf(":%d", webPort))
 	}()
 
 	go func() {
-		log.Infof("starting user-service RPC server on port %d\n", rpcPort)
+		log.Infof("starting customer-service RPC server on port %d\n", rpcPort)
 		errChan <- rpc.Register(rpcServer)
 		errChan <- rpcServer.Listen(rpcPort)
 	}()

@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"github.com/aerosystems/user-service/internal/services"
-	"github.com/labstack/echo/v4"
+	"github.com/aerosystems/customer-service/internal/services"
 	"github.com/sirupsen/logrus"
 	"strings"
 )
@@ -10,10 +9,10 @@ import (
 type BaseHandler struct {
 	mode        string
 	log         *logrus.Logger
-	userService services.UserService
+	userService services.CustomerService
 }
 
-func NewBaseHandler(mode string, log *logrus.Logger, userService services.UserService) *BaseHandler {
+func NewBaseHandler(mode string, log *logrus.Logger, userService services.CustomerService) *BaseHandler {
 	return &BaseHandler{
 		mode:        mode,
 		log:         log,

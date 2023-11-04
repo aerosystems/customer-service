@@ -1,6 +1,6 @@
 package main
 
-import "github.com/aerosystems/user-service/internal/handlers"
+import "github.com/aerosystems/customer-service/internal/handlers"
 
 type Config struct {
 	baseHandler *handlers.BaseHandler

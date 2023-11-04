@@ -2,7 +2,7 @@ FROM alpine:latest
 RUN mkdir /app
 RUN mkdir /app/logs
 
-COPY ./user-service/user-service.bin /app
+COPY ./customer-service/customer-service.bin /app
 
 # Run the server executable
-CMD [ "/app/user-service.bin" ]
+CMD [ "/app/customer-service.bin" ]

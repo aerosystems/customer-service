@@ -2,31 +2,31 @@ package RPCServer
 
 import (
 	"fmt"
-	"github.com/aerosystems/user-service/internal/services"
+	"github.com/aerosystems/customer-service/internal/services"
 	"github.com/sirupsen/logrus"
 	"net"
 	"net/rpc"
 )
 
-type UserServer struct {
+type CustomerServer struct {
 	rpcPort     int
 	log         *logrus.Logger
-	userService services.UserService
+	userService services.CustomerService
 }
 
 func NewUserServer(
 	rpcPort int,
 	log *logrus.Logger,
-	userService services.UserService,
-) *UserServer {
-	return &UserServer{
+	customerService services.CustomerService,
+) *CustomerServer {
+	return &CustomerServer{
 		rpcPort:     rpcPort,
 		log:         log,
-		userService: userService,
+		userService: customerService,
 	}
 }
 
-func (us *UserServer) Listen(rpcPort int) error {
+func (us *CustomerServer) Listen(rpcPort int) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", rpcPort))
 	if err != nil {
 		return err
