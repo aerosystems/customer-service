@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/aerosystems/customer-service/internal/services"
 	echojwt "github.com/labstack/echo-jwt/v4"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
 	"strings"

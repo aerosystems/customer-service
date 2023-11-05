@@ -3,24 +3,32 @@ package services
 import (
 	"errors"
 	"github.com/aerosystems/customer-service/internal/models"
+	RPCServices "github.com/aerosystems/customer-service/internal/rpc_services"
+	"github.com/google/uuid"
 )
 
 type CustomerService interface {
+	CreateUser() (*models.Customer, error)
 	GetUserById(userId uint) (*models.Customer, error)
-	GetUserByEmail(email string) (*models.Customer, error)
-	CreateUser(email, passwordHash string) (*models.Customer, error)
-	ResetPassword(userId uint, passwordHash string) error
-	ActivateUser(userId uint) error
-	MatchPassword(email, passwordHash string) (bool, error)
 }
 
 type CustomerServiceImpl struct {
 	customerRepo models.CustomerRepository
+	projectRPC   *RPCServices.ProjectRPC
+	subsRPC      *RPCServices.SubscriptionRPC
 }
 
-func NewUserServiceImpl(userRepo models.CustomerRepository) *CustomerServiceImpl {
+func NewUserServiceImpl(customerRepository models.CustomerRepository, projectRPC *RPCServices.ProjectRPC, subsRPC *RPCServices.SubscriptionRPC) *CustomerServiceImpl {
 	return &CustomerServiceImpl{
-		customerRepo: userRepo,
+		customerRepo: customerRepository,
+		projectRPC:   projectRPC,
+		subsRPC:      subsRPC,
+	}
+}
+
+func NewCustomer() *models.Customer {
+	return &models.Customer{
+		Uuid: uuid.New(),
 	}
 }
 
@@ -35,10 +43,16 @@ func (us *CustomerServiceImpl) GetUserById(userId uint) (*models.Customer, error
 	return user, nil
 }
 
-func (us *CustomerServiceImpl) CreateUser(email, passwordHash string) (*models.Customer, error) {
-	user := models.NewUserEntity(email, passwordHash, "user")
+func (us *CustomerServiceImpl) CreateUser() (*models.Customer, error) {
+	user := NewCustomer()
 	if err := us.customerRepo.Create(user); err != nil {
 		return nil, errors.New("could not create new user")
+	}
+	if err := us.projectRPC.CreateDefaultProject(user.Id); err != nil {
+		return nil, errors.New("could not create default project")
+	}
+	if err := us.subsRPC.CreateFreeTrial(user.Id); err != nil {
+		return nil, errors.New("could not create free trial")
 	}
 	return user, nil
 }

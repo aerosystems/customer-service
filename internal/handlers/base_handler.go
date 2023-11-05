@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/aerosystems/customer-service/internal/services"
+	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"strings"
 )

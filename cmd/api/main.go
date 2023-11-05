@@ -7,9 +7,11 @@ import (
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/aerosystems/customer-service/internal/repository"
 	RPCServer "github.com/aerosystems/customer-service/internal/rpc_server"
+	RPCServices "github.com/aerosystems/customer-service/internal/rpc_services"
 	"github.com/aerosystems/customer-service/internal/services"
 	GormPostgres "github.com/aerosystems/customer-service/pkg/gorm_postgres"
 	"github.com/aerosystems/customer-service/pkg/logger"
+	RPCClient "github.com/aerosystems/customer-service/pkg/rpc_client"
 	"github.com/sirupsen/logrus"
 	"net/rpc"
 	"os"
@@ -48,7 +50,13 @@ func main() {
 
 	customerRepo := repository.NewCustomerRepo(clientGORM)
 
-	userService := services.NewUserServiceImpl(customerRepo)
+	projectRPCClient := RPCClient.NewClient("tcp", "project-service:5001")
+	projectRPC := RPCServices.NewProjectRPC(projectRPCClient)
+
+	subsRPCClient := RPCClient.NewClient("tcp", "subs-service:5001")
+	subsRPC := RPCServices.NewSubscriptionRPC(subsRPCClient)
+
+	userService := services.NewUserServiceImpl(customerRepo, projectRPC, subsRPC)
 
 	baseHandler := handlers.NewBaseHandler(os.Getenv("APP_ENV"), log.Logger, userService)
 
