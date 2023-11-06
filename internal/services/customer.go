@@ -9,7 +9,7 @@ import (
 
 type CustomerService interface {
 	CreateUser() (*models.Customer, error)
-	GetUserById(userId uint) (*models.Customer, error)
+	GetUserById(userId int) (*models.Customer, error)
 }
 
 type CustomerServiceImpl struct {
@@ -32,7 +32,7 @@ func NewCustomer() *models.Customer {
 	}
 }
 
-func (us *CustomerServiceImpl) GetUserById(userId uint) (*models.Customer, error) {
+func (us *CustomerServiceImpl) GetUserById(userId int) (*models.Customer, error) {
 	user, err := us.customerRepo.GetById(userId)
 	if err != nil {
 		return nil, errors.New("could not get user id")

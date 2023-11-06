@@ -5,7 +5,7 @@ import (
 )
 
 type SubscriptionService interface {
-	CreateFreeTrial(userId uint) error
+	CreateFreeTrial(userId int) error
 }
 
 type SubscriptionRPC struct {
@@ -19,11 +19,11 @@ func NewSubscriptionRPC(rpcClient *rpc.Client) *SubscriptionRPC {
 }
 
 type SubscriptionRPCPayload struct {
-	UserId uint
+	UserId int
 	Kind   string
 }
 
-func (ss *SubscriptionRPC) CreateFreeTrial(userId uint) error {
+func (ss *SubscriptionRPC) CreateFreeTrial(userId int) error {
 	var resSub string
 	err := ss.rpcClient.Call("SubsServer.CreateFreeTrial", SubscriptionRPCPayload{
 		UserId: userId,

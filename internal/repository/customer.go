@@ -21,7 +21,7 @@ func (r *CustomerRepo) GetAll() (*[]models.Customer, error) {
 	return &users, nil
 }
 
-func (r *CustomerRepo) GetById(Id uint) (*models.Customer, error) {
+func (r *CustomerRepo) GetById(Id int) (*models.Customer, error) {
 	var user models.Customer
 	result := r.db.Find(&user, Id)
 	if result.Error != nil {
