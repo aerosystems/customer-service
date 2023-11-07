@@ -12,7 +12,7 @@ type SubscriptionRPC struct {
 	rpcClient *rpc.Client
 }
 
-func NewSubscriptionRPC(rpcClient *rpc.Client) *SubscriptionRPC {
+func NewSubsRPC(rpcClient *rpc.Client) *SubscriptionRPC {
 	return &SubscriptionRPC{
 		rpcClient: rpcClient,
 	}

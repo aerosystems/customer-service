@@ -54,7 +54,7 @@ func main() {
 	projectRPC := RPCServices.NewProjectRPC(projectRPCClient)
 
 	subsRPCClient := RPCClient.NewClient("tcp", "subs-service:5001")
-	subsRPC := RPCServices.NewSubscriptionRPC(subsRPCClient)
+	subsRPC := RPCServices.NewSubsRPC(subsRPCClient)
 
 	userService := services.NewUserServiceImpl(customerRepo, projectRPC, subsRPC)
 
