@@ -18,17 +18,18 @@ func NewProjectRPC(rpcClient *rpc.Client) *ProjectRPC {
 	}
 }
 
-type CreateProjectRPCPayload struct {
+type ProjectRPCPayload struct {
+	ID     int
 	UserId int
 	Name   string
+	Token  string
 }
 
 func (ps *ProjectRPC) CreateDefaultProject(userId int) error {
-	var result string
-	if err := ps.rpcClient.Call("ProjectServer.CreateProject", CreateProjectRPCPayload{
+	if err := ps.rpcClient.Call("ProjectServer.CreateProject", ProjectRPCPayload{
 		UserId: userId,
 		Name:   "default",
-	}, &result); err != nil {
+	}, nil); err != nil {
 		return err
 	}
 	return nil
