@@ -52,7 +52,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.User"
+                                            "$ref": "#/definitions/models.Customer"
                                         }
                                     }
                                 }
@@ -91,16 +91,10 @@ const docTemplate = `{
                 }
             }
         },
-        "models.User": {
+        "models.Customer": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "role": {
+                "uuid": {
                     "type": "string"
                 }
             }
@@ -119,11 +113,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
-	Host:             "gw.verifire.com/user",
+	Host:             "gw.verifire.com/customer",
 	BasePath:         "/",
 	Schemes:          []string{"https"},
-	Title:            "User Service",
-	Description:      "A part of microservice infrastructure, who responsible for user entity.",
+	Title:            "Customer Service",
+	Description:      "A part of microservice infrastructure, who responsible for customer user entity.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

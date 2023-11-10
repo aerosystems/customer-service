@@ -6,25 +6,22 @@ definitions:
       message:
         type: string
     type: object
-  models.User:
+  models.Customer:
     properties:
-      email:
-        type: string
-      id:
-        type: integer
-      role:
+      uuid:
         type: string
     type: object
-host: gw.verifire.com/user
+host: gw.verifire.com/customer
 info:
   contact:
     name: Artem Kostenko
     url: https://github.com/aerosystems
-  description: A part of microservice infrastructure, who responsible for user entity.
+  description: A part of microservice infrastructure, who responsible for customer
+    user entity.
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  title: User Service
+  title: Customer Service
   version: 1.0.0
 paths:
   /v1/users:
@@ -42,7 +39,7 @@ paths:
             - $ref: '#/definitions/handlers.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.User'
+                  $ref: '#/definitions/models.Customer'
               type: object
         "401":
           description: Unauthorized
