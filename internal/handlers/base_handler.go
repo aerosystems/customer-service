@@ -8,16 +8,16 @@ import (
 )
 
 type BaseHandler struct {
-	mode        string
-	log         *logrus.Logger
-	userService services.CustomerService
+	mode            string
+	log             *logrus.Logger
+	customerService services.CustomerService
 }
 
-func NewBaseHandler(mode string, log *logrus.Logger, userService services.CustomerService) *BaseHandler {
+func NewBaseHandler(mode string, log *logrus.Logger, customerService services.CustomerService) *BaseHandler {
 	return &BaseHandler{
-		mode:        mode,
-		log:         log,
-		userService: userService,
+		mode:            mode,
+		log:             log,
+		customerService: customerService,
 	}
 }
 

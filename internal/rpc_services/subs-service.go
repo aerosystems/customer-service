@@ -6,6 +6,7 @@ import (
 
 type SubscriptionService interface {
 	CreateFreeTrial(userId int) error
+	DeleteSubscription(userId int) error
 }
 
 type SubscriptionRPC struct {
@@ -29,6 +30,15 @@ func (ss *SubscriptionRPC) CreateFreeTrial(userId int) error {
 		UserId: userId,
 		Kind:   "startup",
 	}, &resSub)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ss *SubscriptionRPC) DeleteSubscription(userId int) error {
+	var resSub string
+	err := ss.rpcClient.Call("SubsServer.DeleteSubscription", userId, &resSub)
 	if err != nil {
 		return err
 	}

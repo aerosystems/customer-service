@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"github.com/aerosystems/customer-service/internal/models"
 	RPCServices "github.com/aerosystems/customer-service/internal/rpc_services"
 	"github.com/google/uuid"
@@ -18,7 +19,7 @@ type CustomerServiceImpl struct {
 	subsRPC      *RPCServices.SubscriptionRPC
 }
 
-func NewUserServiceImpl(customerRepository models.CustomerRepository, projectRPC *RPCServices.ProjectRPC, subsRPC *RPCServices.SubscriptionRPC) *CustomerServiceImpl {
+func NewCustomerServiceImpl(customerRepository models.CustomerRepository, projectRPC *RPCServices.ProjectRPC, subsRPC *RPCServices.SubscriptionRPC) *CustomerServiceImpl {
 	return &CustomerServiceImpl{
 		customerRepo: customerRepository,
 		projectRPC:   projectRPC,
@@ -43,16 +44,24 @@ func (us *CustomerServiceImpl) GetUserById(userId int) (*models.Customer, error)
 	return user, nil
 }
 
-func (us *CustomerServiceImpl) CreateUser() (*models.Customer, error) {
-	user := NewCustomer()
+func (us *CustomerServiceImpl) CreateUser() (user *models.Customer, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			_ = us.customerRepo.Delete(user)
+			_ = us.subsRPC.DeleteSubscription(user.Id)
+			user = nil
+			err = fmt.Errorf("panic occurred: %v", r)
+		}
+	}()
+	user = NewCustomer()
 	if err := us.customerRepo.Create(user); err != nil {
 		return nil, errors.New("could not create new user")
 	}
-	if err := us.projectRPC.CreateDefaultProject(user.Id); err != nil {
-		return nil, errors.New("could not create default project")
-	}
 	if err := us.subsRPC.CreateFreeTrial(user.Id); err != nil {
-		return nil, errors.New("could not create free trial")
+		panic(errors.New("could not create free trial"))
 	}
-	return user, nil
+	if err := us.projectRPC.CreateDefaultProject(user.Id); err != nil {
+		panic(errors.New("could not create default project"))
+	}
+	return
 }

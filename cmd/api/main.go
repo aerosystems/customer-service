@@ -56,7 +56,7 @@ func main() {
 	subsRPCClient := RPCClient.NewClient("tcp", "subs-service:5001")
 	subsRPC := RPCServices.NewSubsRPC(subsRPCClient)
 
-	userService := services.NewUserServiceImpl(customerRepo, projectRPC, subsRPC)
+	userService := services.NewCustomerServiceImpl(customerRepo, projectRPC, subsRPC)
 
 	baseHandler := handlers.NewBaseHandler(os.Getenv("APP_ENV"), log.Logger, userService)
 
