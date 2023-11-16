@@ -1,14 +1,16 @@
 package RPCServer
 
+import "github.com/google/uuid"
+
 type CustomerRPCPayload struct {
-	UserId int
+	Uuid uuid.UUID
 }
 
-func (us *CustomerServer) CreateCustomer(arg, payload *CustomerRPCPayload) error {
-	user, err := us.userService.CreateUser()
+func (us *CustomerServer) CreateCustomer(_ string, payload *CustomerRPCPayload) error {
+	user, err := us.customerService.CreateUser()
 	if err != nil {
 		return err
 	}
-	payload.UserId = user.Id
+	payload.Uuid = user.Uuid
 	return nil
 }

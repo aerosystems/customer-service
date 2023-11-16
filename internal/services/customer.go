@@ -10,7 +10,7 @@ import (
 
 type CustomerService interface {
 	CreateUser() (*models.Customer, error)
-	GetUserById(userId int) (*models.Customer, error)
+	GetUserByUuid(userUuid string) (*models.Customer, error)
 }
 
 type CustomerServiceImpl struct {
@@ -33,8 +33,8 @@ func NewCustomer() *models.Customer {
 	}
 }
 
-func (us *CustomerServiceImpl) GetUserById(userId int) (*models.Customer, error) {
-	user, err := us.customerRepo.GetById(userId)
+func (us *CustomerServiceImpl) GetUserByUuid(userUuid string) (*models.Customer, error) {
+	user, err := us.customerRepo.GetByUuid(uuid.MustParse(userUuid))
 	if err != nil {
 		return nil, errors.New("could not get user id")
 	}
@@ -44,23 +44,23 @@ func (us *CustomerServiceImpl) GetUserById(userId int) (*models.Customer, error)
 	return user, nil
 }
 
-func (us *CustomerServiceImpl) CreateUser() (user *models.Customer, err error) {
+func (us *CustomerServiceImpl) CreateUser() (customer *models.Customer, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			_ = us.customerRepo.Delete(user)
-			_ = us.subsRPC.DeleteSubscription(user.Id)
-			user = nil
+			_ = us.customerRepo.Delete(customer)
+			_ = us.subsRPC.DeleteSubscription(customer)
+			customer = nil
 			err = fmt.Errorf("panic occurred: %v", r)
 		}
 	}()
-	user = NewCustomer()
-	if err := us.customerRepo.Create(user); err != nil {
-		return nil, errors.New("could not create new user")
+	customer = NewCustomer()
+	if err := us.customerRepo.Create(customer); err != nil {
+		return nil, errors.New("could not create new customer")
 	}
-	if err := us.subsRPC.CreateFreeTrial(user.Id); err != nil {
+	if err := us.subsRPC.CreateFreeTrial(customer); err != nil {
 		panic(errors.New("could not create free trial"))
 	}
-	if err := us.projectRPC.CreateDefaultProject(user.Id); err != nil {
+	if err := us.projectRPC.CreateDefaultProject(customer); err != nil {
 		panic(errors.New("could not create default project"))
 	}
 	return

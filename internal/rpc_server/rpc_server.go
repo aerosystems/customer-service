@@ -9,9 +9,9 @@ import (
 )
 
 type CustomerServer struct {
-	rpcPort     int
-	log         *logrus.Logger
-	userService services.CustomerService
+	rpcPort         int
+	log             *logrus.Logger
+	customerService services.CustomerService
 }
 
 func NewUserServer(
@@ -20,9 +20,9 @@ func NewUserServer(
 	customerService services.CustomerService,
 ) *CustomerServer {
 	return &CustomerServer{
-		rpcPort:     rpcPort,
-		log:         log,
-		userService: customerService,
+		rpcPort:         rpcPort,
+		log:             log,
+		customerService: customerService,
 	}
 }
 

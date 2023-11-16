@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/aerosystems/customer-service/internal/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -24,6 +25,15 @@ func (r *CustomerRepo) GetAll() (*[]models.Customer, error) {
 func (r *CustomerRepo) GetById(Id int) (*models.Customer, error) {
 	var user models.Customer
 	result := r.db.Find(&user, Id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
+func (r *CustomerRepo) GetByUuid(uuid uuid.UUID) (*models.Customer, error) {
+	var user models.Customer
+	result := r.db.Find(&user, "uuid = ?", uuid.String())
 	if result.Error != nil {
 		return nil, result.Error
 	}

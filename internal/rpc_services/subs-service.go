@@ -1,6 +1,8 @@
 package RPCServices
 
 import (
+	"github.com/aerosystems/customer-service/internal/models"
+	"github.com/google/uuid"
 	"net/rpc"
 )
 
@@ -20,15 +22,15 @@ func NewSubsRPC(rpcClient *rpc.Client) *SubscriptionRPC {
 }
 
 type SubscriptionRPCPayload struct {
-	UserId int
-	Kind   string
+	UserUuid uuid.UUID
+	Kind     string
 }
 
-func (ss *SubscriptionRPC) CreateFreeTrial(userId int) error {
+func (ss *SubscriptionRPC) CreateFreeTrial(customer *models.Customer) error {
 	var resSub string
 	err := ss.rpcClient.Call("SubsServer.CreateFreeTrial", SubscriptionRPCPayload{
-		UserId: userId,
-		Kind:   "startup",
+		UserUuid: customer.Uuid,
+		Kind:     "startup",
 	}, &resSub)
 	if err != nil {
 		return err
@@ -36,9 +38,9 @@ func (ss *SubscriptionRPC) CreateFreeTrial(userId int) error {
 	return nil
 }
 
-func (ss *SubscriptionRPC) DeleteSubscription(userId int) error {
+func (ss *SubscriptionRPC) DeleteSubscription(customer *models.Customer) error {
 	var resSub string
-	err := ss.rpcClient.Call("SubsServer.DeleteSubscription", userId, &resSub)
+	err := ss.rpcClient.Call("SubsServer.DeleteSubscription", customer.Uuid, &resSub)
 	if err != nil {
 		return err
 	}

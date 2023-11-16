@@ -20,7 +20,7 @@ import (
 // @Router /v1/users [get]
 func (h *BaseHandler) GetCustomer(c echo.Context) error {
 	accessTokenClaims := c.Get("accessTokenClaims").(services.AccessTokenClaims)
-	user, err := h.customerService.GetUserById(accessTokenClaims.UserId)
+	user, err := h.customerService.GetUserByUuid(accessTokenClaims.UserUuid)
 	if err != nil {
 		return h.ErrorResponse(c, http.StatusInternalServerError, "could not get user", err)
 	}
