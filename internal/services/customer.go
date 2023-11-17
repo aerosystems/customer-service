@@ -34,7 +34,8 @@ func NewCustomer() *models.Customer {
 }
 
 func (us *CustomerServiceImpl) GetUserByUuid(userUuid string) (*models.Customer, error) {
-	user, err := us.customerRepo.GetByUuid(uuid.MustParse(userUuid))
+	uuid := uuid.MustParse(userUuid)
+	user, err := us.customerRepo.GetByUuid(uuid)
 	if err != nil {
 		return nil, errors.New("could not get user id")
 	}
