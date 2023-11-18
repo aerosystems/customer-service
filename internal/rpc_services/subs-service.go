@@ -2,8 +2,9 @@ package RPCServices
 
 import (
 	"github.com/aerosystems/customer-service/internal/models"
+	RPCClient "github.com/aerosystems/customer-service/pkg/rpc_client"
 	"github.com/google/uuid"
-	"net/rpc"
+	"time"
 )
 
 type SubscriptionService interface {
@@ -12,25 +13,26 @@ type SubscriptionService interface {
 }
 
 type SubscriptionRPC struct {
-	rpcClient *rpc.Client
+	rpcClient *RPCClient.ReconnectRPCClient
 }
 
-func NewSubsRPC(rpcClient *rpc.Client) *SubscriptionRPC {
+func NewSubsRPC(rpcClient *RPCClient.ReconnectRPCClient) *SubscriptionRPC {
 	return &SubscriptionRPC{
 		rpcClient: rpcClient,
 	}
 }
 
-type SubscriptionRPCPayload struct {
-	UserUuid uuid.UUID
-	Kind     string
+type SubsRPCPayload struct {
+	UserUuid   uuid.UUID
+	Kind       models.KindSubscription
+	AccessTime time.Time
 }
 
 func (ss *SubscriptionRPC) CreateFreeTrial(customer *models.Customer) error {
 	var resSub string
-	err := ss.rpcClient.Call("SubsServer.CreateFreeTrial", SubscriptionRPCPayload{
+	err := ss.rpcClient.Call("SubsServer.CreateFreeTrial", SubsRPCPayload{
 		UserUuid: customer.Uuid,
-		Kind:     "startup",
+		Kind:     models.Startup,
 	}, &resSub)
 	if err != nil {
 		return err

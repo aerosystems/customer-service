@@ -6,6 +6,7 @@ import (
 	"github.com/aerosystems/customer-service/internal/models"
 	RPCServices "github.com/aerosystems/customer-service/internal/rpc_services"
 	"github.com/google/uuid"
+	"github.com/labstack/gommon/log"
 )
 
 type CustomerService interface {
@@ -62,6 +63,7 @@ func (us *CustomerServiceImpl) CreateUser() (customer *models.Customer, err erro
 		panic(errors.New("could not create free trial"))
 	}
 	if err := us.projectRPC.CreateDefaultProject(customer); err != nil {
+		log.Errorf("could not create default project: %v", err)
 		panic(errors.New("could not create default project"))
 	}
 	return

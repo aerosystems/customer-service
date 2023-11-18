@@ -60,7 +60,7 @@ func main() {
 
 	baseHandler := handlers.NewBaseHandler(os.Getenv("APP_ENV"), log.Logger, userService)
 
-	rpcServer := RPCServer.NewUserServer(rpcPort, log.Logger, userService)
+	rpcServer := RPCServer.NewCustomerServer(rpcPort, log.Logger, userService)
 
 	app := NewApp(baseHandler)
 	e := app.NewRouter()

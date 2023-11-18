@@ -2,8 +2,8 @@ package RPCServices
 
 import (
 	"github.com/aerosystems/customer-service/internal/models"
+	RPCClient "github.com/aerosystems/customer-service/pkg/rpc_client"
 	"github.com/google/uuid"
-	"net/rpc"
 )
 
 type ProjectService interface {
@@ -11,10 +11,10 @@ type ProjectService interface {
 }
 
 type ProjectRPC struct {
-	rpcClient *rpc.Client
+	rpcClient *RPCClient.ReconnectRPCClient
 }
 
-func NewProjectRPC(rpcClient *rpc.Client) *ProjectRPC {
+func NewProjectRPC(rpcClient *RPCClient.ReconnectRPCClient) *ProjectRPC {
 	return &ProjectRPC{
 		rpcClient: rpcClient,
 	}
@@ -28,9 +28,8 @@ type ProjectRPCPayload struct {
 }
 
 func (ps *ProjectRPC) CreateDefaultProject(customer *models.Customer) error {
-	if err := ps.rpcClient.Call("ProjectServer.CreateProject", ProjectRPCPayload{
+	if err := ps.rpcClient.Call("ProjectServer.CreateDefaultProject", ProjectRPCPayload{
 		UserUuid: customer.Uuid,
-		Name:     "default",
 	}, nil); err != nil {
 		return err
 	}

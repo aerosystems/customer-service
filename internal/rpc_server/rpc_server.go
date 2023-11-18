@@ -14,7 +14,7 @@ type CustomerServer struct {
 	customerService services.CustomerService
 }
 
-func NewUserServer(
+func NewCustomerServer(
 	rpcPort int,
 	log *logrus.Logger,
 	customerService services.CustomerService,
