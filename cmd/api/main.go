@@ -62,9 +62,15 @@ func main() {
 
 	rpcServer := RPCServer.NewCustomerServer(rpcPort, log.Logger, userService)
 
-	app := NewApp(baseHandler)
+	accessTokenService := services.NewAccessTokenServiceImpl(os.Getenv("ACCESS_SECRET"))
+
+	oauthMiddleware := middleware.NewOAuthMiddlewareImpl(accessTokenService)
+	basicAuthMiddleware := middleware.NewBasicAuthMiddlewareImpl(os.Getenv("BASIC_AUTH_DOCS_USERNAME"), os.Getenv("BASIC_AUTH_DOCS_PASSWORD"))
+
+	app := NewApp(baseHandler, oauthMiddleware, basicAuthMiddleware)
 	e := app.NewRouter()
-	middleware.AddMiddleware(e, log.Logger)
+	middleware.AddLog(e, log.Logger)
+	middleware.AddCORS(e)
 
 	errChan := make(chan error)
 

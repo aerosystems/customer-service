@@ -24,7 +24,7 @@ info:
   title: Customer Service
   version: 1.0.0
 paths:
-  /v1/users:
+  /v1/customers:
     get:
       consumes:
       - application/json
