@@ -24,5 +24,5 @@ func (h *BaseHandler) GetCustomer(c echo.Context) error {
 	if err != nil {
 		return h.ErrorResponse(c, http.StatusInternalServerError, "could not get user", err)
 	}
-	return h.SuccessResponse(c, http.StatusOK, "user was successfully found", user)
+	return h.SuccessResponse(c, http.StatusOK, "customer was successfully found", user)
 }

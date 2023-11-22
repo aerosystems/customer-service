@@ -67,7 +67,7 @@ func main() {
 	oauthMiddleware := middleware.NewOAuthMiddlewareImpl(accessTokenService)
 	basicAuthMiddleware := middleware.NewBasicAuthMiddlewareImpl(os.Getenv("BASIC_AUTH_DOCS_USERNAME"), os.Getenv("BASIC_AUTH_DOCS_PASSWORD"))
 
-	app := NewApp(baseHandler, oauthMiddleware, basicAuthMiddleware)
+	app := NewConfig(baseHandler, oauthMiddleware, basicAuthMiddleware)
 	e := app.NewRouter()
 	middleware.AddLog(e, log.Logger)
 	middleware.AddCORS(e)

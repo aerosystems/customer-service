@@ -11,7 +11,7 @@ type Config struct {
 	basicAuthMiddleware middleware.BasicAuthMiddleware
 }
 
-func NewApp(baseHandler *handlers.BaseHandler, oauthMiddleware middleware.OAuthMiddleware, basicAuthMiddleware middleware.BasicAuthMiddleware) *Config {
+func NewConfig(baseHandler *handlers.BaseHandler, oauthMiddleware middleware.OAuthMiddleware, basicAuthMiddleware middleware.BasicAuthMiddleware) *Config {
 	return &Config{
 		baseHandler:         baseHandler,
 		oauthMiddleware:     oauthMiddleware,
