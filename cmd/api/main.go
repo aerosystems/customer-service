@@ -70,7 +70,6 @@ func main() {
 	app := NewConfig(baseHandler, oauthMiddleware, basicAuthMiddleware)
 	e := app.NewRouter()
 	middleware.AddLog(e, log.Logger)
-	middleware.AddCORS(e)
 
 	errChan := make(chan error)
 
