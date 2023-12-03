@@ -32,7 +32,7 @@ func (ss *SubscriptionRPC) CreateFreeTrial(customer *models.Customer) error {
 	var resSub string
 	err := ss.rpcClient.Call("SubsServer.CreateFreeTrial", SubsRPCPayload{
 		UserUuid: customer.Uuid,
-		Kind:     models.Startup,
+		Kind:     models.TrialSubscription,
 	}, &resSub)
 	if err != nil {
 		return err
