@@ -5,7 +5,7 @@ import (
 	"github.com/aerosystems/customer-service/internal/handlers"
 	"github.com/aerosystems/customer-service/internal/middleware"
 	"github.com/aerosystems/customer-service/internal/models"
-	"github.com/aerosystems/customer-service/internal/repository"
+	"github.com/aerosystems/customer-service/internal/repository/pg"
 	RPCServer "github.com/aerosystems/customer-service/internal/rpc_server"
 	RPCServices "github.com/aerosystems/customer-service/internal/rpc_services"
 	"github.com/aerosystems/customer-service/internal/services"
@@ -48,7 +48,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	customerRepo := repository.NewCustomerRepo(clientGORM)
+	customerRepo := pg.NewCustomerRepo(clientGORM)
 
 	projectRPCClient := RPCClient.NewClient("tcp", "project-service:5001")
 	projectRPC := RPCServices.NewProjectRPC(projectRPCClient)
