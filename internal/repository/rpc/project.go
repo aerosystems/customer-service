@@ -1,4 +1,4 @@
-package RPCServices
+package rpcRepo
 
 import (
 	"github.com/aerosystems/customer-service/internal/models"
@@ -6,16 +6,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type ProjectService interface {
-	CreateDefaultProject(userId int) error
-}
-
-type ProjectRPC struct {
+type ProjectRepo struct {
 	rpcClient *RPCClient.ReconnectRPCClient
 }
 
-func NewProjectRPC(rpcClient *RPCClient.ReconnectRPCClient) *ProjectRPC {
-	return &ProjectRPC{
+func NewProjectRepo(rpcClient *RPCClient.ReconnectRPCClient) *ProjectRepo {
+	return &ProjectRepo{
 		rpcClient: rpcClient,
 	}
 }
@@ -27,8 +23,8 @@ type ProjectRPCPayload struct {
 	Token    string
 }
 
-func (ps *ProjectRPC) CreateDefaultProject(customer *models.Customer) error {
-	if err := ps.rpcClient.Call("ProjectServer.CreateDefaultProject", ProjectRPCPayload{
+func (pr *ProjectRepo) CreateDefaultProject(customer *models.Customer) error {
+	if err := pr.rpcClient.Call("Server.CreateDefaultProject", ProjectRPCPayload{
 		UserUuid: customer.Uuid,
 	}, nil); err != nil {
 		return err

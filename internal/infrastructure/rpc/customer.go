@@ -6,8 +6,8 @@ type CustomerRPCPayload struct {
 	Uuid uuid.UUID
 }
 
-func (us *CustomerServer) CreateCustomer(_ string, payload *CustomerRPCPayload) error {
-	user, err := us.customerService.CreateUser()
+func (s Server) CreateCustomer(_ string, payload *CustomerRPCPayload) error {
+	user, err := s.customerUsecase.CreateUser()
 	if err != nil {
 		return err
 	}

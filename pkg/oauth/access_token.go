@@ -1,4 +1,4 @@
-package services
+package OAuthService
 
 import (
 	"github.com/golang-jwt/jwt"
@@ -12,26 +12,21 @@ type AccessTokenClaims struct {
 	jwt.StandardClaims
 }
 
-type TokenService interface {
-	GetAccessSecret() string
-	DecodeAccessToken(tokenString string) (*AccessTokenClaims, error)
-}
-
-type AccessTokenServiceImpl struct {
+type AccessTokenService struct {
 	accessSecret string
 }
 
-func NewAccessTokenServiceImpl(accessSecret string) *AccessTokenServiceImpl {
-	return &AccessTokenServiceImpl{
+func NewAccessTokenService(accessSecret string) *AccessTokenService {
+	return &AccessTokenService{
 		accessSecret: accessSecret,
 	}
 }
 
-func (r *AccessTokenServiceImpl) GetAccessSecret() string {
+func (r AccessTokenService) GetAccessSecret() string {
 	return r.accessSecret
 }
 
-func (r *AccessTokenServiceImpl) DecodeAccessToken(tokenString string) (*AccessTokenClaims, error) {
+func (r AccessTokenService) DecodeAccessToken(tokenString string) (*AccessTokenClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &AccessTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(r.accessSecret), nil
 	})

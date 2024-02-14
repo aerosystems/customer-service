@@ -2,36 +2,39 @@ package RPCServer
 
 import (
 	"fmt"
-	"github.com/aerosystems/customer-service/internal/services"
 	"github.com/sirupsen/logrus"
 	"net"
 	"net/rpc"
 )
 
-type CustomerServer struct {
-	rpcPort         int
+const rpcPort = 5001
+
+type Server struct {
 	log             *logrus.Logger
-	customerService services.CustomerService
+	customerUsecase CustomerUsecase
 }
 
-func NewCustomerServer(
-	rpcPort int,
+func NewServer(
 	log *logrus.Logger,
-	customerService services.CustomerService,
-) *CustomerServer {
-	return &CustomerServer{
-		rpcPort:         rpcPort,
+	customerUsecase CustomerUsecase,
+) *Server {
+	return &Server{
 		log:             log,
-		customerService: customerService,
+		customerUsecase: customerUsecase,
 	}
 }
 
-func (us *CustomerServer) Listen(rpcPort int) error {
+func (s Server) Run() error {
+	if err := rpc.Register(s); err != nil {
+		return err
+	}
+	s.log.Infof("starting customer-service RPC server on port %d\n", rpcPort)
 	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", rpcPort))
 	if err != nil {
 		return err
 	}
 	defer listen.Close()
+
 	for {
 		rpcConn, err := listen.Accept()
 		if err != nil {
