@@ -25,16 +25,16 @@ import (
 func InitApp() *App {
 	panic(wire.Build(
 		wire.Bind(new(rest.CustomerUsecase), new(*usecases.CustomerUsecase)),
-		wire.Bind(new(RPCServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
+		wire.Bind(new(RpcServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*pg.CustomerRepo)),
-		wire.Bind(new(usecases.SubsRepository), new(*rpcRepo.SubsRepo)),
-		wire.Bind(new(usecases.ProjectRepository), new(*rpcRepo.ProjectRepo)),
-		wire.Bind(new(HTTPServer.TokenService), new(*OAuthService.AccessTokenService)),
+		wire.Bind(new(usecases.SubsRepository), new(*RpcRepo.SubsRepo)),
+		wire.Bind(new(usecases.ProjectRepository), new(*RpcRepo.ProjectRepo)),
+		wire.Bind(new(HttpServer.TokenService), new(*OAuthService.AccessTokenService)),
 		ProvideApp,
 		ProvideLogger,
 		ProvideConfig,
-		ProvideHTTPServer,
-		ProvideRPCServer,
+		ProvideHttpServer,
+		ProvideRpcServer,
 		ProvideLogrusLogger,
 		ProvideLogrusEntry,
 		ProvideGormPostgres,
@@ -48,7 +48,7 @@ func InitApp() *App {
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HTTPServer.Server, rpcServer *RPCServer.Server) *App {
+func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server, rpcServer *RpcServer.Server) *App {
 	panic(wire.Build(NewApp))
 }
 
@@ -60,12 +60,12 @@ func ProvideConfig() *config.Config {
 	panic(wire.Build(config.NewConfig))
 }
 
-func ProvideHTTPServer(log *logrus.Logger, cfg *config.Config, customerHandler *rest.CustomerHandler, tokenService HTTPServer.TokenService) *HTTPServer.Server {
-	panic(wire.Build(HTTPServer.NewServer))
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *rest.CustomerHandler, tokenService HttpServer.TokenService) *HttpServer.Server {
+	panic(wire.Build(HttpServer.NewServer))
 }
 
-func ProvideRPCServer(log *logrus.Logger, customerUsecase RPCServer.CustomerUsecase) *RPCServer.Server {
-	panic(wire.Build(RPCServer.NewServer))
+func ProvideRpcServer(log *logrus.Logger, customerUsecase RpcServer.CustomerUsecase) *RpcServer.Server {
+	panic(wire.Build(RpcServer.NewServer))
 }
 
 func ProvideLogrusEntry(log *logger.Logger) *logrus.Entry {
@@ -100,14 +100,14 @@ func ProvideCustomerRepo(db *gorm.DB) *pg.CustomerRepo {
 	panic(wire.Build(pg.NewCustomerRepo))
 }
 
-func ProvideSubsRepo(cfg *config.Config) *rpcRepo.SubsRepo {
+func ProvideSubsRepo(cfg *config.Config) *RpcRepo.SubsRepo {
 	rpcClient := RPCClient.NewClient("tcp", cfg.SubsServiceRPCAddress)
-	return rpcRepo.NewSubsRepo(rpcClient)
+	return RpcRepo.NewSubsRepo(rpcClient)
 }
 
-func ProvideProjectRepo(cfg *config.Config) *rpcRepo.ProjectRepo {
+func ProvideProjectRepo(cfg *config.Config) *RpcRepo.ProjectRepo {
 	rpcClient := RPCClient.NewClient("tcp", cfg.ProjectServiceRPCAddress)
-	return rpcRepo.NewProjectRepo(rpcClient)
+	return RpcRepo.NewProjectRepo(rpcClient)
 }
 
 func ProvideAccessTokenService(cfg *config.Config) *OAuthService.AccessTokenService {

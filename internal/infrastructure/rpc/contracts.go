@@ -1,4 +1,4 @@
-package RPCServer
+package RpcServer
 
 import "github.com/aerosystems/customer-service/internal/models"
 
