@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Mode                     string `mapstructure:"MODE"  required:"true"`
 	PostgresDSN              string `mapstructure:"POSTGRES_DSN"  required:"true"`
-	ProjectServiceRPCAddress string `mapstructure:"PROJECT_SERVICE_RPC_ADDR"  required:"true"`
+	ProjectServiceRpcAddress string `mapstructure:"PROJECT_SERVICE_RPC_ADDR"  required:"true"`
 	SubsServiceRPCAddress    string `mapstructure:"SUBS_SERVICE_RPC_ADDR" required:"true"`
 	AccessSecret             string `mapstructure:"ACCESS_SECRET"  required:"true"`
 }

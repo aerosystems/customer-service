@@ -2,14 +2,14 @@ package RpcRepo
 
 import (
 	"github.com/aerosystems/customer-service/internal/models"
-	RPCClient "github.com/aerosystems/customer-service/pkg/rpc_client"
+	RpcClient "github.com/aerosystems/customer-service/pkg/rpc_client"
 )
 
 type SubsRepo struct {
-	rpcClient *RPCClient.ReconnectRPCClient
+	rpcClient *RpcClient.ReconnectRpcClient
 }
 
-func NewSubsRepo(rpcClient *RPCClient.ReconnectRPCClient) *SubsRepo {
+func NewSubsRepo(rpcClient *RpcClient.ReconnectRpcClient) *SubsRepo {
 	return &SubsRepo{
 		rpcClient: rpcClient,
 	}
