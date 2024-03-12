@@ -46,7 +46,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/handlers.Response"
+                                    "$ref": "#/definitions/rest.Response"
                                 },
                                 {
                                     "type": "object",
@@ -62,19 +62,25 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/rest.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/rest.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rest.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/rest.ErrorResponse"
                         }
                     }
                 }
@@ -82,19 +88,31 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.Response": {
+        "models.Customer": {
             "type": "object",
             "properties": {
-                "data": {},
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "error": {},
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "models.Customer": {
+        "rest.Response": {
             "type": "object",
             "properties": {
-                "uuid": {
+                "data": {},
+                "message": {
                     "type": "string"
                 }
             }

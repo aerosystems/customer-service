@@ -1,17 +1,25 @@
 basePath: /
 definitions:
-  handlers.Response:
-    properties:
-      data: {}
-      message:
-        type: string
-    type: object
   models.Customer:
     properties:
       uuid:
         type: string
     type: object
-host: gw.verifire.com/customer
+  rest.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      error: {}
+      message:
+        type: string
+    type: object
+  rest.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+host: gw.verifire.dev/customer
 info:
   contact:
     name: Artem Kostenko
@@ -36,7 +44,7 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/handlers.Response'
+            - $ref: '#/definitions/rest.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Customer'
@@ -44,15 +52,19 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.Response'
+            $ref: '#/definitions/rest.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/handlers.Response'
+            $ref: '#/definitions/rest.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.Response'
+            $ref: '#/definitions/rest.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user
