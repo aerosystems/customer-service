@@ -17,7 +17,6 @@ import (
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/gorm_postgres"
 	"github.com/aerosystems/customer-service/pkg/logger"
-	"github.com/aerosystems/customer-service/pkg/oauth"
 	"github.com/aerosystems/customer-service/pkg/rpc_client"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -38,8 +37,7 @@ func InitApp() *App {
 	subsRepo := ProvideSubsRepo(config)
 	customerUsecase := ProvideCustomerUsecase(customerRepo, projectRepo, subsRepo)
 	customerHandler := ProvideCustomerHandler(baseHandler, customerUsecase)
-	accessTokenService := ProvideAccessTokenService(config)
-	server := ProvideHttpServer(logrusLogger, config, customerHandler, accessTokenService)
+	server := ProvideHttpServer(logrusLogger, config, customerHandler)
 	rpcServerServer := ProvideRpcServer(logrusLogger, customerUsecase)
 	app := ProvideApp(logrusLogger, config, server, rpcServerServer)
 	return app
@@ -58,11 +56,6 @@ func ProvideLogger() *logger.Logger {
 func ProvideConfig() *config.Config {
 	configConfig := config.NewConfig()
 	return configConfig
-}
-
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *rest.CustomerHandler, tokenService HttpServer.TokenService) *HttpServer.Server {
-	server := HttpServer.NewServer(log, customerHandler, tokenService)
-	return server
 }
 
 func ProvideRpcServer(log *logrus.Logger, customerUsecase RpcServer.CustomerUsecase) *RpcServer.Server {
@@ -86,6 +79,10 @@ func ProvideCustomerRepo(db *gorm.DB) *pg.CustomerRepo {
 }
 
 // wire.go:
+
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *rest.CustomerHandler) *HttpServer.Server {
+	return HttpServer.NewServer(log, cfg.AccessSecret, customerHandler)
+}
 
 func ProvideLogrusEntry(log *logger.Logger) *logrus.Entry {
 	return logrus.NewEntry(log.Logger)
@@ -115,8 +112,4 @@ func ProvideSubsRepo(cfg *config.Config) *RpcRepo.SubsRepo {
 func ProvideProjectRepo(cfg *config.Config) *RpcRepo.ProjectRepo {
 	rpcClient := RpcClient.NewClient("tcp", cfg.ProjectServiceRpcAddress)
 	return RpcRepo.NewProjectRepo(rpcClient)
-}
-
-func ProvideAccessTokenService(cfg *config.Config) *OAuthService.AccessTokenService {
-	return OAuthService.NewAccessTokenService(cfg.AccessSecret)
 }

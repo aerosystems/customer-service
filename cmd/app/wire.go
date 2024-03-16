@@ -14,7 +14,6 @@ import (
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/gorm_postgres"
 	"github.com/aerosystems/customer-service/pkg/logger"
-	"github.com/aerosystems/customer-service/pkg/oauth"
 	"github.com/aerosystems/customer-service/pkg/rpc_client"
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
@@ -29,7 +28,6 @@ func InitApp() *App {
 		wire.Bind(new(usecases.CustomerRepository), new(*pg.CustomerRepo)),
 		wire.Bind(new(usecases.SubsRepository), new(*RpcRepo.SubsRepo)),
 		wire.Bind(new(usecases.ProjectRepository), new(*RpcRepo.ProjectRepo)),
-		wire.Bind(new(HttpServer.TokenService), new(*OAuthService.AccessTokenService)),
 		ProvideApp,
 		ProvideLogger,
 		ProvideConfig,
@@ -44,7 +42,6 @@ func InitApp() *App {
 		ProvideCustomerRepo,
 		ProvideSubsRepo,
 		ProvideProjectRepo,
-		ProvideAccessTokenService,
 	))
 }
 
@@ -60,8 +57,8 @@ func ProvideConfig() *config.Config {
 	panic(wire.Build(config.NewConfig))
 }
 
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *rest.CustomerHandler, tokenService HttpServer.TokenService) *HttpServer.Server {
-	panic(wire.Build(HttpServer.NewServer))
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *rest.CustomerHandler) *HttpServer.Server {
+	return HttpServer.NewServer(log, cfg.AccessSecret, customerHandler)
 }
 
 func ProvideRpcServer(log *logrus.Logger, customerUsecase RpcServer.CustomerUsecase) *RpcServer.Server {
@@ -108,8 +105,4 @@ func ProvideSubsRepo(cfg *config.Config) *RpcRepo.SubsRepo {
 func ProvideProjectRepo(cfg *config.Config) *RpcRepo.ProjectRepo {
 	rpcClient := RpcClient.NewClient("tcp", cfg.ProjectServiceRpcAddress)
 	return RpcRepo.NewProjectRepo(rpcClient)
-}
-
-func ProvideAccessTokenService(cfg *config.Config) *OAuthService.AccessTokenService {
-	return OAuthService.NewAccessTokenService(cfg.AccessSecret)
 }
