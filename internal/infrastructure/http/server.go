@@ -2,7 +2,7 @@ package HttpServer
 
 import (
 	"fmt"
-	"github.com/aerosystems/customer-service/internal/infrastructure/rest"
+	"github.com/aerosystems/customer-service/internal/infrastructure/http/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -13,13 +13,13 @@ type Server struct {
 	log             *logrus.Logger
 	echo            *echo.Echo
 	accessSecret    string
-	customerHandler *rest.CustomerHandler
+	customerHandler *handlers.CustomerHandler
 }
 
 func NewServer(
 	log *logrus.Logger,
 	accessSecret string,
-	customerHandler *rest.CustomerHandler,
+	customerHandler *handlers.CustomerHandler,
 
 ) *Server {
 	return &Server{

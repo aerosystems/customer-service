@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/aerosystems/customer-service/internal/config"
-	HttpServer "github.com/aerosystems/customer-service/internal/http"
+	HttpServer "github.com/aerosystems/customer-service/internal/infrastructure/http"
 	RpcServer "github.com/aerosystems/customer-service/internal/infrastructure/rpc"
 	"github.com/sirupsen/logrus"
 )

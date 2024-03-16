@@ -5,9 +5,9 @@ package main
 
 import (
 	"github.com/aerosystems/customer-service/internal/config"
-	"github.com/aerosystems/customer-service/internal/http"
-	"github.com/aerosystems/customer-service/internal/infrastructure/rest"
-	"github.com/aerosystems/customer-service/internal/infrastructure/rpc"
+	HttpServer "github.com/aerosystems/customer-service/internal/infrastructure/http"
+	"github.com/aerosystems/customer-service/internal/infrastructure/http/handlers"
+	RpcServer "github.com/aerosystems/customer-service/internal/infrastructure/rpc"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/aerosystems/customer-service/internal/repository/pg"
 	"github.com/aerosystems/customer-service/internal/repository/rpc"
@@ -23,7 +23,7 @@ import (
 //go:generate wire
 func InitApp() *App {
 	panic(wire.Build(
-		wire.Bind(new(rest.CustomerUsecase), new(*usecases.CustomerUsecase)),
+		wire.Bind(new(handlers.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(RpcServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*pg.CustomerRepo)),
 		wire.Bind(new(usecases.SubsRepository), new(*RpcRepo.SubsRepo)),
@@ -57,7 +57,7 @@ func ProvideConfig() *config.Config {
 	panic(wire.Build(config.NewConfig))
 }
 
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *rest.CustomerHandler) *HttpServer.Server {
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
 	return HttpServer.NewServer(log, cfg.AccessSecret, customerHandler)
 }
 
@@ -81,12 +81,12 @@ func ProvideGormPostgres(e *logrus.Entry, cfg *config.Config) *gorm.DB {
 	return db
 }
 
-func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *rest.BaseHandler {
-	return rest.NewBaseHandler(log, cfg.Mode)
+func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *handlers.BaseHandler {
+	return handlers.NewBaseHandler(log, cfg.Mode)
 }
 
-func ProvideCustomerHandler(baseHandler *rest.BaseHandler, customerUsecase rest.CustomerUsecase) *rest.CustomerHandler {
-	panic(wire.Build(rest.NewCustomerHandler))
+func ProvideCustomerHandler(baseHandler *handlers.BaseHandler, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
+	panic(wire.Build(handlers.NewCustomerHandler))
 }
 
 func ProvideCustomerUsecase(customerRepo usecases.CustomerRepository, projectRepo usecases.ProjectRepository, subsRepository usecases.SubsRepository) *usecases.CustomerUsecase {
