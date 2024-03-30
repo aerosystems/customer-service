@@ -17,24 +17,6 @@ func NewCustomerRepo(db *gorm.DB) *CustomerRepo {
 	}
 }
 
-func (r *CustomerRepo) GetAll() (*[]models.Customer, error) {
-	var users []models.Customer
-	r.db.Find(&users)
-	return &users, nil
-}
-
-func (r *CustomerRepo) GetById(Id int) (*models.Customer, error) {
-	var user models.Customer
-	result := r.db.Find(&user, Id)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, result.Error
-	}
-	return &user, nil
-}
-
 func (r *CustomerRepo) GetByUuid(uuid uuid.UUID) (*models.Customer, error) {
 	var user models.Customer
 	result := r.db.Find(&user, "uuid = ?", uuid.String())
