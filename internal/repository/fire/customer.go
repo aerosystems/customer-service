@@ -9,19 +9,17 @@ import (
 
 type CustomerRepo struct {
 	client *firestore.Client
-	ctx    context.Context
 }
 
-func NewCustomerRepo(client *firestore.Client, ctx context.Context) *CustomerRepo {
+func NewCustomerRepo(client *firestore.Client) *CustomerRepo {
 	return &CustomerRepo{
 		client: client,
-		ctx:    ctx,
 	}
 }
 
-func (r *CustomerRepo) GetByUuid(uuid uuid.UUID) (*models.Customer, error) {
+func (r *CustomerRepo) GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.Customer, error) {
 	docRef := r.client.Collection("customers").Doc(uuid.String())
-	doc, err := docRef.Get(r.ctx)
+	doc, err := docRef.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -34,17 +32,17 @@ func (r *CustomerRepo) GetByUuid(uuid uuid.UUID) (*models.Customer, error) {
 	return &customer, nil
 }
 
-func (r *CustomerRepo) Create(customer *models.Customer) error {
-	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Set(r.ctx, customer)
+func (r *CustomerRepo) Create(ctx context.Context, customer *models.Customer) error {
+	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Set(ctx, customer)
 	return err
 }
 
-func (r *CustomerRepo) Update(customer *models.Customer) error {
-	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Set(r.ctx, customer)
+func (r *CustomerRepo) Update(ctx context.Context, customer *models.Customer) error {
+	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Set(ctx, customer)
 	return err
 }
 
-func (r *CustomerRepo) Delete(customer *models.Customer) error {
-	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Delete(r.ctx)
+func (r *CustomerRepo) Delete(ctx context.Context, customer *models.Customer) error {
+	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Delete(ctx)
 	return err
 }
