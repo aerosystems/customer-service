@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/aerosystems/customer-service/internal/models"
@@ -34,7 +35,8 @@ func NewCustomer() *models.Customer {
 
 func (cu *CustomerUsecase) GetUserByUuid(userUuid string) (*models.Customer, error) {
 	uuid := uuid.MustParse(userUuid)
-	user, err := cu.customerRepo.GetByUuid(uuid)
+	ctx := context.Background()
+	user, err := cu.customerRepo.GetByUuid(ctx, uuid)
 	if err != nil {
 		return nil, errors.New("could not get user id")
 	}
@@ -47,14 +49,16 @@ func (cu *CustomerUsecase) GetUserByUuid(userUuid string) (*models.Customer, err
 func (cu *CustomerUsecase) CreateUser() (customer *models.Customer, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			_ = cu.customerRepo.Delete(customer)
+			ctx := context.Background()
+			_ = cu.customerRepo.Delete(ctx, customer)
 			_ = cu.subsRepo.DeleteSubscription(customer)
 			customer = nil
 			err = fmt.Errorf("panic occurred: %v", r)
 		}
 	}()
 	customer = NewCustomer()
-	if err := cu.customerRepo.Create(customer); err != nil {
+	ctx := context.Background()
+	if err := cu.customerRepo.Create(ctx, customer); err != nil {
 		return nil, errors.New("could not create new customer")
 	}
 	if err := cu.subsRepo.CreateFreeTrial(customer); err != nil {

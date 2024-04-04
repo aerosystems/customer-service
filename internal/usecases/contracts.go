@@ -1,15 +1,16 @@
 package usecases
 
 import (
+	"context"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/google/uuid"
 )
 
 type CustomerRepository interface {
-	GetByUuid(uuid uuid.UUID) (*models.Customer, error)
-	Create(user *models.Customer) error
-	Update(user *models.Customer) error
-	Delete(user *models.Customer) error
+	GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.Customer, error)
+	Create(ctx context.Context, user *models.Customer) error
+	Update(ctx context.Context, user *models.Customer) error
+	Delete(ctx context.Context, user *models.Customer) error
 }
 
 type ProjectRepository interface {
