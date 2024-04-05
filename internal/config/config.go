@@ -13,6 +13,7 @@ type Config struct {
 	SubsServiceRPCAddress    string `mapstructure:"SUBS_SERVICE_RPC_ADDR" required:"true"`
 	AccessSecret             string `mapstructure:"ACCESS_SECRET"  required:"true"`
 	GcpProjectId             string `mapstructure:"GCP_PROJECT_ID"  required:"true"`
+	FirestoreHost            string `mapstructure:"FIRESTORE_HOST"  required:"true"`
 }
 
 func NewConfig() *Config {
