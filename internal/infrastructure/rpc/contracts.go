@@ -3,5 +3,5 @@ package RpcServer
 import "github.com/aerosystems/customer-service/internal/models"
 
 type CustomerUsecase interface {
-	CreateUser() (*models.Customer, error)
+	CreateCustomer() (*models.Customer, error)
 }

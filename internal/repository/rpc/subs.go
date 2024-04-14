@@ -3,6 +3,8 @@ package RpcRepo
 import (
 	"github.com/aerosystems/customer-service/internal/models"
 	RpcClient "github.com/aerosystems/customer-service/pkg/rpc_client"
+	"github.com/google/uuid"
+	"time"
 )
 
 type SubsRepo struct {
@@ -15,11 +17,17 @@ func NewSubsRepo(rpcClient *RpcClient.ReconnectRpcClient) *SubsRepo {
 	}
 }
 
+type SubsRPCPayload struct {
+	UserUuid   uuid.UUID
+	Kind       string
+	AccessTime time.Time
+}
+
 func (ss *SubsRepo) CreateFreeTrial(customer *models.Customer) error {
 	var resSub string
-	err := ss.rpcClient.Call("Server.CreateFreeTrial", models.SubsRPCPayload{
+	err := ss.rpcClient.Call("Server.CreateFreeTrial", SubsRPCPayload{
 		UserUuid: customer.Uuid,
-		Kind:     models.TrialSubscription,
+		Kind:     models.TrialSubscription.String(),
 	}, &resSub)
 	if err != nil {
 		return err

@@ -7,7 +7,7 @@ type CustomerRPCPayload struct {
 }
 
 func (s Server) CreateCustomer(_ string, payload *CustomerRPCPayload) error {
-	user, err := s.customerUsecase.CreateUser()
+	user, err := s.customerUsecase.CreateCustomer()
 	if err != nil {
 		return err
 	}

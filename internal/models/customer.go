@@ -6,8 +6,7 @@ import (
 )
 
 type Customer struct {
-	Id        int       `json:"-" gorm:"primaryKey;unique;autoIncrement"`
-	Uuid      uuid.UUID `json:"uuid" gorm:"unique"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	Uuid      uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

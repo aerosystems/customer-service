@@ -22,6 +22,16 @@ func NewCustomerHandler(
 	}
 }
 
+type CustomerResponse struct {
+	Uuid string `json:"uuid"`
+}
+
+func ModelToCustomerResponse(user *models.Customer) *CustomerResponse {
+	return &CustomerResponse{
+		Uuid: user.Uuid.String(),
+	}
+}
+
 // GetCustomer godoc
 // @Summary Get user
 // @Description Get user
@@ -45,5 +55,5 @@ func (ch CustomerHandler) GetCustomer(c echo.Context) error {
 		err := errors.New("user not found")
 		return ch.ErrorResponse(c, http.StatusNotFound, err.Error(), err)
 	}
-	return ch.SuccessResponse(c, http.StatusOK, "customer was successfully found", user)
+	return ch.SuccessResponse(c, http.StatusOK, "customer was successfully found", ModelToCustomerResponse(user))
 }

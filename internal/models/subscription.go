@@ -1,24 +1,29 @@
 package models
 
-import (
-	"github.com/google/uuid"
-	"time"
-)
-
-type SubsRPCPayload struct {
-	UserUuid   uuid.UUID
-	Kind       KindSubscription
-	AccessTime time.Time
+type KindSubscription struct {
+	slug string
 }
 
-type KindSubscription string
-
-const (
-	TrialSubscription    KindSubscription = "trial"
-	StartupSubscription  KindSubscription = "startup"
-	BusinessSubscription KindSubscription = "business"
+var (
+	UnknownSubscription  = KindSubscription{"unknown"}
+	TrialSubscription    = KindSubscription{"trial"}
+	StartupSubscription  = KindSubscription{"startup"}
+	BusinessSubscription = KindSubscription{"business"}
 )
 
 func (k KindSubscription) String() string {
-	return string(k)
+	return k.slug
+}
+
+func NewKindSubscription(kind string) KindSubscription {
+	switch kind {
+	case TrialSubscription.String():
+		return TrialSubscription
+	case StartupSubscription.String():
+		return StartupSubscription
+	case BusinessSubscription.String():
+		return BusinessSubscription
+	default:
+		return UnknownSubscription
+	}
 }
