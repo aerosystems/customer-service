@@ -39,11 +39,11 @@ func ModelToCustomerResponse(user *models.Customer) *CustomerResponse {
 // @Accept  json
 // @Produce application/json
 // @Security BearerAuth
-// @Success 200 {object} rest.Response{data=models.Customer}
-// @Failure 401 {object} rest.ErrorResponse
-// @Failure 403 {object} rest.ErrorResponse
-// @Failure 404 {object} rest.ErrorResponse
-// @Failure 500 {object} rest.ErrorResponse
+// @Success 200 {object} handlers.Response{data=models.Customer}
+// @Failure 401 {object} handlers.ErrorResponse
+// @Failure 403 {object} handlers.ErrorResponse
+// @Failure 404 {object} handlers.ErrorResponse
+// @Failure 500 {object} handlers.ErrorResponse
 // @Router /v1/customers [get]
 func (ch CustomerHandler) GetCustomer(c echo.Context) error {
 	accessTokenClaims := c.Get("accessTokenClaims").(models.AccessTokenClaims)

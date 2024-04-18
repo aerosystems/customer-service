@@ -1,11 +1,6 @@
 basePath: /
 definitions:
-  models.Customer:
-    properties:
-      uuid:
-        type: string
-    type: object
-  rest.ErrorResponse:
+  handlers.ErrorResponse:
     properties:
       code:
         type: integer
@@ -13,10 +8,19 @@ definitions:
       message:
         type: string
     type: object
-  rest.Response:
+  handlers.Response:
     properties:
       data: {}
       message:
+        type: string
+    type: object
+  models.Customer:
+    properties:
+      createdAt:
+        type: string
+      updatedAt:
+        type: string
+      uuid:
         type: string
     type: object
 host: gw.verifire.dev/customer
@@ -44,7 +48,7 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rest.Response'
+            - $ref: '#/definitions/handlers.Response'
             - properties:
                 data:
                   $ref: '#/definitions/models.Customer'
@@ -52,19 +56,19 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/rest.ErrorResponse'
+            $ref: '#/definitions/handlers.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/rest.ErrorResponse'
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rest.ErrorResponse'
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rest.ErrorResponse'
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user
