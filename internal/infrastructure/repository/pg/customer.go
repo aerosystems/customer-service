@@ -23,14 +23,12 @@ type Customer struct {
 	Id        int       `gorm:"primaryKey;unique;autoIncrement"`
 	Uuid      uuid.UUID `gorm:"unique"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
 func (c *Customer) ToModel() *models.Customer {
 	return &models.Customer{
 		Uuid:      c.Uuid,
 		CreatedAt: c.CreatedAt,
-		UpdatedAt: c.UpdatedAt,
 	}
 }
 
@@ -38,7 +36,6 @@ func CustomerToPg(customer *models.Customer) *Customer {
 	return &Customer{
 		Uuid:      customer.Uuid,
 		CreatedAt: customer.CreatedAt,
-		UpdatedAt: customer.UpdatedAt,
 	}
 }
 

@@ -8,5 +8,4 @@ import (
 type Customer struct {
 	Uuid      uuid.UUID
 	CreatedAt time.Time
-	UpdatedAt time.Time
 }

@@ -9,47 +9,37 @@ import (
 	"github.com/aerosystems/customer-service/internal/config"
 	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/rpc"
 	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
-	"github.com/aerosystems/customer-service/internal/infrastructure/repository/pg"
-	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
-	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
-	RpcServer "github.com/aerosystems/customer-service/internal/presenters/rpc"
+	"github.com/aerosystems/customer-service/internal/presenters/consumer"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"github.com/aerosystems/customer-service/pkg/gorm_postgres"
 	"github.com/aerosystems/customer-service/pkg/logger"
+	PubSub "github.com/aerosystems/customer-service/pkg/pubsub"
 	"github.com/aerosystems/customer-service/pkg/rpc_client"
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 //go:generate wire
 func InitApp() *App {
 	panic(wire.Build(
-		wire.Bind(new(handlers.CustomerUsecase), new(*usecases.CustomerUsecase)),
-		wire.Bind(new(RpcServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
+		wire.Bind(new(consumer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*fire.CustomerRepo)),
 		wire.Bind(new(usecases.SubsRepository), new(*RpcRepo.SubsRepo)),
 		wire.Bind(new(usecases.ProjectRepository), new(*RpcRepo.ProjectRepo)),
 		ProvideApp,
 		ProvideLogger,
 		ProvideConfig,
-		ProvideHttpServer,
-		ProvideRpcServer,
 		ProvideLogrusLogger,
-		//ProvideLogrusEntry,
-		//ProvideGormPostgres,
 		ProvideFirestoreClient,
-		ProvideBaseHandler,
-		ProvideCustomerHandler,
 		ProvideCustomerUsecase,
-		//ProvideCustomerRepo,
 		ProvideFireCustomerRepo,
 		ProvideSubsRepo,
 		ProvideProjectRepo,
+		ProvideAuthConsumer,
+		ProvidePubSubClient,
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server, rpcServer *RpcServer.Server) *App {
+func ProvideApp(log *logrus.Logger, cfg *config.Config, authConsumer *consumer.AuthSubscription) *App {
 	panic(wire.Build(NewApp))
 }
 
@@ -61,44 +51,12 @@ func ProvideConfig() *config.Config {
 	panic(wire.Build(config.NewConfig))
 }
 
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
-	return HttpServer.NewServer(log, cfg.AccessSecret, customerHandler)
-}
-
-func ProvideRpcServer(log *logrus.Logger, customerUsecase RpcServer.CustomerUsecase) *RpcServer.Server {
-	panic(wire.Build(RpcServer.NewServer))
-}
-
-func ProvideLogrusEntry(log *logger.Logger) *logrus.Entry {
-	return logrus.NewEntry(log.Logger)
-}
-
 func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
 	return log.Logger
 }
 
-func ProvideGormPostgres(e *logrus.Entry, cfg *config.Config) *gorm.DB {
-	db := GormPostgres.NewClient(e, cfg.PostgresDSN)
-	if err := db.AutoMigrate(&pg.Customer{}); err != nil { // TODO: Move to migration
-		panic(err)
-	}
-	return db
-}
-
-func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *handlers.BaseHandler {
-	return handlers.NewBaseHandler(log, cfg.Mode)
-}
-
-func ProvideCustomerHandler(baseHandler *handlers.BaseHandler, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
-	panic(wire.Build(handlers.NewCustomerHandler))
-}
-
 func ProvideCustomerUsecase(customerRepo usecases.CustomerRepository, projectRepo usecases.ProjectRepository, subsRepository usecases.SubsRepository) *usecases.CustomerUsecase {
 	panic(wire.Build(usecases.NewCustomerUsecase))
-}
-
-func ProvideCustomerRepo(db *gorm.DB) *pg.CustomerRepo {
-	panic(wire.Build(pg.NewCustomerRepo))
 }
 
 func ProvideSubsRepo(cfg *config.Config) *RpcRepo.SubsRepo {
@@ -122,4 +80,23 @@ func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
 
 func ProvideFireCustomerRepo(client *firestore.Client) *fire.CustomerRepo {
 	panic(wire.Build(fire.NewCustomerRepo))
+}
+
+func ProvideAuthConsumer(log *logrus.Logger, cfg *config.Config, client *PubSub.Client, customerUsecase consumer.CustomerUsecase) *consumer.AuthSubscription {
+	return consumer.NewAuthSubscription(log, client, cfg.AuthTopicId, cfg.AuthSubName, customerUsecase)
+}
+
+func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
+	var client *PubSub.Client
+	var err error
+	switch cfg.Mode {
+	case "dev":
+		client, err = PubSub.NewClient(cfg.GcpProjectId)
+	default:
+		client, err = PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
+	}
+	if err != nil {
+		panic(err)
+	}
+	return client
 }

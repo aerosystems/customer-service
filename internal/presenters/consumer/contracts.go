@@ -1,7 +1,7 @@
-package handlers
+package consumer
 
 import "github.com/aerosystems/customer-service/internal/models"
 
 type CustomerUsecase interface {
-	GetUserByUuid(uuid string) (*models.Customer, error)
+	CreateCustomer(uuid string) (*models.Customer, error)
 }

@@ -32,7 +32,6 @@ func (c *CustomerFirestore) ToModel() *models.Customer {
 	return &models.Customer{
 		Uuid:      uuid.MustParse(c.Uuid),
 		CreatedAt: c.CreatedAt,
-		UpdatedAt: c.UpdatedAt,
 	}
 }
 
@@ -40,7 +39,6 @@ func CustomerToFirestore(customer *models.Customer) *CustomerFirestore {
 	return &CustomerFirestore{
 		Uuid:      customer.Uuid.String(),
 		CreatedAt: customer.CreatedAt,
-		UpdatedAt: customer.UpdatedAt,
 	}
 }
 
@@ -71,7 +69,6 @@ func (r *CustomerRepo) Create(ctx context.Context, customer *models.Customer) er
 func (r *CustomerRepo) Update(ctx context.Context, customer *models.Customer) error {
 	c, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
-	customer.UpdatedAt = time.Now()
 	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Set(c, CustomerToFirestore(customer))
 	return err
 }

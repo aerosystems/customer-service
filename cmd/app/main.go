@@ -6,7 +6,7 @@ import (
 )
 
 // @title Customer Service
-// @version 1.0.0
+// @version 2.0.0
 // @description A part of microservice infrastructure, who responsible for customer user entity.
 
 // @contact.name Artem Kostenko
@@ -24,11 +24,6 @@ import (
 // @schemes https
 // @BasePath /
 func main() {
-	// TODO: add migrations
-	//if err := clientGORM.AutoMigrate(models.Customer{}); err != nil {
-	//	log.Fatal(err)
-	//}
-
 	app := InitApp()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -37,11 +32,7 @@ func main() {
 	group, ctx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		return app.httpServer.Run()
-	})
-
-	group.Go(func() error {
-		return app.rpcServer.Run()
+		return app.authConsumer.Run()
 	})
 
 	group.Go(func() error {

@@ -2,34 +2,27 @@ package config
 
 import (
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
 )
 
 type Config struct {
-	Mode                     string `mapstructure:"MODE"  required:"true"`
-	PostgresDSN              string `mapstructure:"POSTGRES_DSN"  required:"true"`
-	ProjectServiceRpcAddress string `mapstructure:"PROJECT_SERVICE_RPC_ADDR"  required:"true"`
-	SubsServiceRPCAddress    string `mapstructure:"SUBS_SERVICE_RPC_ADDR" required:"true"`
-	AccessSecret             string `mapstructure:"ACCESS_SECRET"  required:"true"`
-	GcpProjectId             string `mapstructure:"GCP_PROJECT_ID"  required:"true"`
-	FirestoreHost            string `mapstructure:"FIRESTORE_HOST"  required:"true"`
+	Mode                         string
+	GcpProjectId                 string
+	GoogleApplicationCredentials string
+	ProjectServiceRpcAddress     string
+	SubsServiceRPCAddress        string
+	AuthTopicId                  string
+	AuthSubName                  string
 }
 
 func NewConfig() *Config {
-	var cfg Config
 	viper.AutomaticEnv()
-	executablePath, err := os.Executable()
-	if err != nil {
-		panic(err)
+	return &Config{
+		Mode:                         viper.GetString("CSTMR_MODE"),
+		GcpProjectId:                 viper.GetString("GCP_PROJECT_ID"),
+		GoogleApplicationCredentials: viper.GetString("GOOGLE_APPLICATION_CREDENTIALS"),
+		ProjectServiceRpcAddress:     viper.GetString("CSTMR_PROJECT_SERVICE_RPC_ADDR"),
+		SubsServiceRPCAddress:        viper.GetString("CSTMR_SUBS_SERVICE_RPC_ADDR"),
+		AuthTopicId:                  viper.GetString("CSTMR_AUTH_TOPIC_ID"),
+		AuthSubName:                  viper.GetString("CSTMR_AUTH_SUB_NAME"),
 	}
-	executableDir := filepath.Dir(executablePath)
-	viper.SetConfigFile(filepath.Join(executableDir, ".env"))
-	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
-	}
-	if err := viper.Unmarshal(&cfg); err != nil {
-		panic(err)
-	}
-	return &cfg
 }
