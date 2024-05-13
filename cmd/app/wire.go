@@ -10,6 +10,8 @@ import (
 	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/rpc"
 	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
 	"github.com/aerosystems/customer-service/internal/presenters/consumer"
+	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
+	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/logger"
 	PubSub "github.com/aerosystems/customer-service/pkg/pubsub"
@@ -21,6 +23,7 @@ import (
 //go:generate wire
 func InitApp() *App {
 	panic(wire.Build(
+		wire.Bind(new(handlers.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(consumer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*fire.CustomerRepo)),
 		wire.Bind(new(usecases.SubsRepository), new(*RpcRepo.SubsRepo)),
@@ -36,10 +39,12 @@ func InitApp() *App {
 		ProvideProjectRepo,
 		ProvideAuthConsumer,
 		ProvidePubSubClient,
+		ProvideHttpServer,
+		ProvideCustomerHandler,
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, authConsumer *consumer.AuthSubscription) *App {
+func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server, authConsumer *consumer.AuthSubscription) *App {
 	panic(wire.Build(NewApp))
 }
 
@@ -87,16 +92,17 @@ func ProvideAuthConsumer(log *logrus.Logger, cfg *config.Config, client *PubSub.
 }
 
 func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
-	var client *PubSub.Client
-	var err error
-	switch cfg.Mode {
-	case "dev":
-		client, err = PubSub.NewClient(cfg.GcpProjectId)
-	default:
-		client, err = PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
-	}
+	client, err := PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
 	if err != nil {
 		panic(err)
 	}
 	return client
+}
+
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler handlers.CustomerHandler) *HttpServer.Server {
+	panic(wire.Build(HttpServer.NewServer))
+}
+
+func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
+	panic(wire.Build(handlers.NewCustomerHandler))
 }

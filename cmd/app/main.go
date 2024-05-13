@@ -32,6 +32,10 @@ func main() {
 	group, ctx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
+		return app.httpServer.Run()
+	})
+
+	group.Go(func() error {
 		return app.authConsumer.Run()
 	})
 

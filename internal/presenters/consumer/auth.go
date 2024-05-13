@@ -39,7 +39,7 @@ func (s AuthSubscription) Run() error {
 	}
 	if !ok {
 		if _, err := s.pubsubClient.Client.CreateTopic(s.pubsubClient.Ctx, s.topicId); err != nil {
-			s.log.Errorf("Failed to create topic: %v", err)
+			s.log.Fatalf("Failed to create topic: %v", err)
 		}
 		s.log.Infof("Topic %s created.\n", s.topicId)
 	}
@@ -53,7 +53,7 @@ func (s AuthSubscription) Run() error {
 		if _, err := s.pubsubClient.Client.CreateSubscription(s.pubsubClient.Ctx, s.subName, pubsub.SubscriptionConfig{
 			Topic: topic,
 		}); err != nil {
-			s.log.Errorf("Failed to create subscription: %v", err)
+			s.log.Fatalf("Failed to create subscription: %v", err)
 		}
 		s.log.Infof("Subscription %s created.\n", s.subName)
 	}

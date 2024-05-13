@@ -93,14 +93,7 @@ func ProvideAuthConsumer(log *logrus.Logger, cfg *config.Config, client *PubSub.
 }
 
 func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
-	var client *PubSub.Client
-	var err error
-	switch cfg.Mode {
-	case "dev":
-		client, err = PubSub.NewClient(cfg.GcpProjectId)
-	default:
-		client, err = PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
-	}
+	client, err := PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
 	if err != nil {
 		panic(err)
 	}
