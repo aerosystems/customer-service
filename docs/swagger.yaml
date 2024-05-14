@@ -1,5 +1,15 @@
 basePath: /
 definitions:
+  handlers.CreateCustomerRequestBody:
+    properties:
+      uuid:
+        type: string
+    type: object
+  handlers.Customer:
+    properties:
+      uuid:
+        type: string
+    type: object
   handlers.ErrorResponse:
     properties:
       code:
@@ -14,15 +24,6 @@ definitions:
       message:
         type: string
     type: object
-  models.Customer:
-    properties:
-      createdAt:
-        type: string
-      updatedAt:
-        type: string
-      uuid:
-        type: string
-    type: object
 host: gw.verifire.dev/customer
 info:
   contact:
@@ -34,25 +35,36 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   title: Customer Service
-  version: 1.0.0
+  version: 2.0.0
 paths:
   /v1/customers:
-    get:
+    post:
       consumes:
       - application/json
-      description: Get user
+      description: Create user
+      parameters:
+      - description: Create user
+        in: body
+        name: raw
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateCustomerRequestBody'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             allOf:
             - $ref: '#/definitions/handlers.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Customer'
+                  $ref: '#/definitions/handlers.Customer'
               type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
@@ -61,17 +73,13 @@ paths:
           description: Forbidden
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Get user
+      summary: Create user
       tags:
       - users
 schemes:

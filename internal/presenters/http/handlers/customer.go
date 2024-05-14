@@ -46,7 +46,7 @@ func ModelToCustomerResponse(user *models.Customer) *Customer {
 // @Accept  json
 // @Produce application/json
 // @Security BearerAuth
-// @Param body CreateCustomerRequestBody true "Create user"
+// @Param raw body handlers.CreateCustomerRequestBody true "Create user"
 // @Success 201 {object} handlers.Response{data=handlers.Customer}
 // @Failure 400 {object} handlers.ErrorResponse
 // @Failure 401 {object} handlers.ErrorResponse
