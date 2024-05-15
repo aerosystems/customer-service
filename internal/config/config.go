@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	Mode                         string
+	WebPort                      int
 	GcpProjectId                 string
 	GoogleApplicationCredentials string
 	ProjectServiceRpcAddress     string
@@ -18,6 +19,7 @@ func NewConfig() *Config {
 	viper.AutomaticEnv()
 	return &Config{
 		Mode:                         viper.GetString("CSTMR_MODE"),
+		WebPort:                      viper.GetInt("PORT"),
 		GcpProjectId:                 viper.GetString("GCP_PROJECT_ID"),
 		GoogleApplicationCredentials: viper.GetString("GOOGLE_APPLICATION_CREDENTIALS"),
 		ProjectServiceRpcAddress:     viper.GetString("CSTMR_PROJECT_SERVICE_RPC_ADDR"),
