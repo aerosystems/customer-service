@@ -36,10 +36,6 @@ func main() {
 	})
 
 	group.Go(func() error {
-		return app.authConsumer.Run()
-	})
-
-	group.Go(func() error {
 		return app.handleSignals(ctx, cancel)
 	})
 

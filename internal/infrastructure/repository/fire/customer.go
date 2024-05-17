@@ -3,6 +3,7 @@ package fire
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/google/uuid"
 	"time"
@@ -25,7 +26,6 @@ func NewCustomerRepo(client *firestore.Client) *CustomerRepo {
 type CustomerFirestore struct {
 	Uuid      string    `firestore:"uuid"`
 	CreatedAt time.Time `firestore:"created_at"`
-	UpdatedAt time.Time `firestore:"updated_at"`
 }
 
 func (c *CustomerFirestore) ToModel() *models.Customer {
@@ -60,9 +60,16 @@ func (r *CustomerRepo) GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.C
 }
 
 func (r *CustomerRepo) Create(ctx context.Context, customer *models.Customer) error {
+	currentCustomer, err := r.GetByUuid(ctx, customer.Uuid)
+	if err != nil {
+		return err
+	}
+	if currentCustomer != nil {
+		return CustomErrors.NewConflictError("customer already exists")
+	}
 	c, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
-	_, err := r.client.Collection("customers").Doc(customer.Uuid.String()).Set(c, CustomerToFirestore(customer))
+	_, err = r.client.Collection("customers").Doc(customer.Uuid.String()).Set(c, CustomerToFirestore(customer))
 	return err
 }
 

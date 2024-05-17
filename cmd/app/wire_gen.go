@@ -12,7 +12,8 @@ import (
 	"github.com/aerosystems/customer-service/internal/config"
 	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/rpc"
 	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
-	"github.com/aerosystems/customer-service/internal/presenters/consumer"
+	"github.com/aerosystems/customer-service/internal/presenters/http"
+	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/logger"
 	"github.com/aerosystems/customer-service/pkg/pubsub"
@@ -27,19 +28,20 @@ func InitApp() *App {
 	logger := ProvideLogger()
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
-	client := ProvidePubSubClient(config)
-	firestoreClient := ProvideFirestoreClient(config)
-	customerRepo := ProvideFireCustomerRepo(firestoreClient)
+	baseHandler := ProvideBaseHandler(logrusLogger, config)
+	client := ProvideFirestoreClient(config)
+	customerRepo := ProvideFireCustomerRepo(client)
 	projectRepo := ProvideProjectRepo(config)
 	subsRepo := ProvideSubsRepo(config)
 	customerUsecase := ProvideCustomerUsecase(customerRepo, projectRepo, subsRepo)
-	authSubscription := ProvideAuthConsumer(logrusLogger, config, client, customerUsecase)
-	app := ProvideApp(logrusLogger, config, authSubscription)
+	customerHandler := ProvideCustomerHandler(logrusLogger, baseHandler, customerUsecase)
+	server := ProvideHttpServer(logrusLogger, config, customerHandler)
+	app := ProvideApp(logrusLogger, config, server)
 	return app
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, authConsumer *consumer.AuthSubscription) *App {
-	app := NewApp(log, cfg, authConsumer)
+func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server) *App {
+	app := NewApp(log, cfg, httpServer)
 	return app
 }
 
@@ -61,6 +63,16 @@ func ProvideCustomerUsecase(customerRepo usecases.CustomerRepository, projectRep
 func ProvideFireCustomerRepo(client *firestore.Client) *fire.CustomerRepo {
 	customerRepo := fire.NewCustomerRepo(client)
 	return customerRepo
+}
+
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
+	server := HttpServer.NewServer(log, customerHandler)
+	return server
+}
+
+func ProvideCustomerHandler(log *logrus.Logger, baseHandler *handlers.BaseHandler, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
+	customerHandler := handlers.NewCustomerHandler(baseHandler, customerUsecase)
+	return customerHandler
 }
 
 // wire.go:
@@ -88,14 +100,14 @@ func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
 	return client
 }
 
-func ProvideAuthConsumer(log *logrus.Logger, cfg *config.Config, client *PubSub.Client, customerUsecase consumer.CustomerUsecase) *consumer.AuthSubscription {
-	return consumer.NewAuthSubscription(log, client, cfg.AuthTopicId, cfg.AuthSubName, customerUsecase)
-}
-
 func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 	client, err := PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
 	if err != nil {
 		panic(err)
 	}
 	return client
+}
+
+func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *handlers.BaseHandler {
+	return handlers.NewBaseHandler(log, cfg.Mode)
 }

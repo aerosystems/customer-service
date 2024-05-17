@@ -48,7 +48,7 @@ func (cu *CustomerUsecase) CreateCustomer(uuidStr string) (customer *models.Cust
 	}
 	ctx := context.Background()
 	if err := cu.customerRepo.Create(ctx, customer); err != nil {
-		return nil, fmt.Errorf("could not create new customer: %v", err)
+		return nil, err
 	}
 	//if err := cu.subsRepo.CreateFreeTrial(customer); err != nil {
 	//	log.Errorf("could not create free trial: %v", err)

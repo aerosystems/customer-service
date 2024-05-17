@@ -9,7 +9,6 @@ import (
 	"github.com/aerosystems/customer-service/internal/config"
 	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/rpc"
 	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
-	"github.com/aerosystems/customer-service/internal/presenters/consumer"
 	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
@@ -24,7 +23,6 @@ import (
 func InitApp() *App {
 	panic(wire.Build(
 		wire.Bind(new(handlers.CustomerUsecase), new(*usecases.CustomerUsecase)),
-		wire.Bind(new(consumer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*fire.CustomerRepo)),
 		wire.Bind(new(usecases.SubsRepository), new(*RpcRepo.SubsRepo)),
 		wire.Bind(new(usecases.ProjectRepository), new(*RpcRepo.ProjectRepo)),
@@ -37,14 +35,13 @@ func InitApp() *App {
 		ProvideFireCustomerRepo,
 		ProvideSubsRepo,
 		ProvideProjectRepo,
-		ProvideAuthConsumer,
-		ProvidePubSubClient,
 		ProvideHttpServer,
 		ProvideCustomerHandler,
+		ProvideBaseHandler,
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server, authConsumer *consumer.AuthSubscription) *App {
+func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server) *App {
 	panic(wire.Build(NewApp))
 }
 
@@ -87,10 +84,6 @@ func ProvideFireCustomerRepo(client *firestore.Client) *fire.CustomerRepo {
 	panic(wire.Build(fire.NewCustomerRepo))
 }
 
-func ProvideAuthConsumer(log *logrus.Logger, cfg *config.Config, client *PubSub.Client, customerUsecase consumer.CustomerUsecase) *consumer.AuthSubscription {
-	return consumer.NewAuthSubscription(log, client, cfg.AuthTopicId, cfg.AuthSubName, customerUsecase)
-}
-
 func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 	client, err := PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
 	if err != nil {
@@ -99,10 +92,14 @@ func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 	return client
 }
 
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler handlers.CustomerHandler) *HttpServer.Server {
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
 	panic(wire.Build(HttpServer.NewServer))
 }
 
-func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
+func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *handlers.BaseHandler {
+	return handlers.NewBaseHandler(log, cfg.Mode)
+}
+
+func ProvideCustomerHandler(log *logrus.Logger, baseHandler *handlers.BaseHandler, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
 	panic(wire.Build(handlers.NewCustomerHandler))
 }
