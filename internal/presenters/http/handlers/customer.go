@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/labstack/echo/v4"
@@ -61,8 +62,9 @@ func (ch CustomerHandler) CreateCustomer(c echo.Context) error {
 	}
 	user, err := ch.customerUsecase.CreateCustomer(req.Uuid)
 	if err != nil {
-		if customErr, ok := err.(*CustomErrors.ConflictError); ok {
-			return ch.ErrorResponse(c, http.StatusConflict, err.Error(), customErr)
+		var apiErr CustomErrors.APIError
+		if errors.As(err, &apiErr) {
+			return ch.ErrorResponse(c, apiErr.HttpCode, apiErr.Message, err)
 		}
 		return ch.ErrorResponse(c, http.StatusInternalServerError, "could not create user", err)
 	}

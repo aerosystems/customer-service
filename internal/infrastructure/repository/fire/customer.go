@@ -3,9 +3,12 @@ package fire
 import (
 	"cloud.google.com/go/firestore"
 	"context"
-	"github.com/aerosystems/customer-service/internal/common/custom_errors"
+	"errors"
+	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"time"
 )
 
@@ -48,6 +51,9 @@ func (r *CustomerRepo) GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.C
 	docRef := r.client.Collection("customers").Doc(uuid.String())
 	doc, err := docRef.Get(c)
 	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			return nil, CustomErrors.ErrCustomerNotFound
+		}
 		return nil, err
 	}
 
@@ -61,11 +67,11 @@ func (r *CustomerRepo) GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.C
 
 func (r *CustomerRepo) Create(ctx context.Context, customer *models.Customer) error {
 	currentCustomer, err := r.GetByUuid(ctx, customer.Uuid)
-	if err != nil {
+	if err != nil && !errors.Is(err, CustomErrors.ErrCustomerNotFound) {
 		return err
 	}
 	if currentCustomer != nil {
-		return CustomErrors.NewConflictError("customer already exists")
+		return CustomErrors.ErrCustomerAlreadyExists
 	}
 	c, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
