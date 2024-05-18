@@ -1,9 +1,12 @@
 package CustomErrors
 
+import (
+	"net/http"
+)
+
 type APIError struct {
 	Message  string
 	HttpCode int
-	RpcCode  int
 }
 
 func (e APIError) Error() string {
@@ -11,6 +14,6 @@ func (e APIError) Error() string {
 }
 
 var (
-	ErrCustomerAlreadyExists = APIError{"Customer already exists", 409, 6}
-	ErrCustomerNotFound      = APIError{"Customer not found", 404, 7}
+	ErrCustomerAlreadyExists = APIError{"Customer already exists", http.StatusConflict}
+	ErrCustomerNotFound      = APIError{"Customer not found", http.StatusNotFound}
 )

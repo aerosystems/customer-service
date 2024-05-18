@@ -13,11 +13,6 @@ type CustomerRepository interface {
 	Delete(ctx context.Context, uuid uuid.UUID) error
 }
 
-type ProjectRepository interface {
-	CreateDefaultProject(customer *models.Customer) error
-}
-
-type SubsRepository interface {
-	CreateFreeTrial(customer *models.Customer) error
-	DeleteSubscription(customer *models.Customer) error
+type SubscriptionEventsAdapter interface {
+	PublishCreateSubscriptionEvent(customerUuid uuid.UUID, subscriptionType models.SubscriptionType, subscriptionDuration models.SubscriptionDuration) error
 }

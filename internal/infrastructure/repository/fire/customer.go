@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"errors"
+	"fmt"
 	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/google/uuid"
@@ -54,12 +55,12 @@ func (r *CustomerRepo) GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.C
 		if status.Code(err) == codes.NotFound {
 			return nil, CustomErrors.ErrCustomerNotFound
 		}
-		return nil, err
+		return nil, fmt.Errorf("could not get customer from Firestore repository: %w", err)
 	}
 
 	var customer CustomerFirestore
 	if err := doc.DataTo(&customer); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not convert Firestore data to customer: %w", err)
 	}
 
 	return customer.ToModel(), nil

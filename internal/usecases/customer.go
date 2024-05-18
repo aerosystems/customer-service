@@ -5,42 +5,32 @@ import (
 	"fmt"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
-const defaultTimeout = 2 * time.Second
-
 type CustomerUsecase struct {
-	customerRepo CustomerRepository
-	projectRepo  ProjectRepository
-	subsRepo     SubsRepository
+	log                       *logrus.Logger
+	customerRepo              CustomerRepository
+	subscriptionEventsAdapter SubscriptionEventsAdapter
 }
 
 func NewCustomerUsecase(
+	log *logrus.Logger,
 	customerRepo CustomerRepository,
-	projectRepo ProjectRepository,
-	subsRepo SubsRepository,
+	subscriptionEventsAdapter SubscriptionEventsAdapter,
 ) *CustomerUsecase {
 	return &CustomerUsecase{
-		customerRepo: customerRepo,
-		projectRepo:  projectRepo,
-		subsRepo:     subsRepo,
+		log:                       log,
+		customerRepo:              customerRepo,
+		subscriptionEventsAdapter: subscriptionEventsAdapter,
 	}
 }
 
-func (cu *CustomerUsecase) CreateCustomer(uuidStr string) (customer *models.Customer, err error) {
-	//defer func() {
-	//	if r := recover(); r != nil {
-	//		ctx := context.Background()
-	//		_ = cu.customerRepo.Delete(ctx, customer.Uuid)
-	//		_ = cu.subsRepo.DeleteSubscription(customer)
-	//		customer = nil
-	//		err = fmt.Errorf("panic occurred: %v", r)
-	//	}
-	//}()
+func (cu CustomerUsecase) CreateCustomer(uuidStr string) (customer *models.Customer, err error) {
 	customerUuid, err := uuid.Parse(uuidStr)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse uuid: %v", err)
+		return nil, fmt.Errorf("could not parse uuid: %w", err)
 	}
 	customer = &models.Customer{
 		Uuid:      customerUuid,
@@ -50,13 +40,12 @@ func (cu *CustomerUsecase) CreateCustomer(uuidStr string) (customer *models.Cust
 	if err := cu.customerRepo.Create(ctx, customer); err != nil {
 		return nil, err
 	}
-	//if err := cu.subsRepo.CreateFreeTrial(customer); err != nil {
-	//	log.Errorf("could not create free trial: %v", err)
-	//	panic(errors.New("could not create free trial"))
-	//}
-	//if err := cu.projectRepo.CreateDefaultProject(customer); err != nil {
-	//	log.Errorf("could not create default project: %v", err)
-	//	panic(errors.New("could not create default project"))
-	//}
-	return
+	if err := cu.subscriptionEventsAdapter.PublishCreateSubscriptionEvent(
+		customerUuid,
+		models.TrialSubscription,
+		models.OneWeekSubscriptionDuration,
+	); err != nil {
+		cu.log.Errorf("could not publish create subscription event: %v", err)
+	}
+	return customer, nil
 }

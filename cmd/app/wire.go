@@ -7,14 +7,13 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"github.com/aerosystems/customer-service/internal/config"
-	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/rpc"
+	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/broker"
 	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
 	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/logger"
 	PubSub "github.com/aerosystems/customer-service/pkg/pubsub"
-	"github.com/aerosystems/customer-service/pkg/rpc_client"
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
 )
@@ -24,8 +23,7 @@ func InitApp() *App {
 	panic(wire.Build(
 		wire.Bind(new(handlers.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*fire.CustomerRepo)),
-		wire.Bind(new(usecases.SubsRepository), new(*RpcRepo.SubsRepo)),
-		wire.Bind(new(usecases.ProjectRepository), new(*RpcRepo.ProjectRepo)),
+		wire.Bind(new(usecases.SubscriptionEventsAdapter), new(*broker.SubscriptionEventsAdapter)),
 		ProvideApp,
 		ProvideLogger,
 		ProvideConfig,
@@ -33,11 +31,11 @@ func InitApp() *App {
 		ProvideFirestoreClient,
 		ProvideCustomerUsecase,
 		ProvideFireCustomerRepo,
-		ProvideSubsRepo,
-		ProvideProjectRepo,
 		ProvideHttpServer,
 		ProvideCustomerHandler,
 		ProvideBaseHandler,
+		ProvidePubSubClient,
+		ProvideSubscriptionEventsAdapter,
 	))
 }
 
@@ -57,18 +55,12 @@ func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
 	return log.Logger
 }
 
-func ProvideCustomerUsecase(customerRepo usecases.CustomerRepository, projectRepo usecases.ProjectRepository, subsRepository usecases.SubsRepository) *usecases.CustomerUsecase {
+func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionEventsAdapter usecases.SubscriptionEventsAdapter) *usecases.CustomerUsecase {
 	panic(wire.Build(usecases.NewCustomerUsecase))
 }
 
-func ProvideSubsRepo(cfg *config.Config) *RpcRepo.SubsRepo {
-	rpcClient := RpcClient.NewClient("tcp", cfg.SubsServiceRPCAddress)
-	return RpcRepo.NewSubsRepo(rpcClient)
-}
-
-func ProvideProjectRepo(cfg *config.Config) *RpcRepo.ProjectRepo {
-	rpcClient := RpcClient.NewClient("tcp", cfg.ProjectServiceRpcAddress)
-	return RpcRepo.NewProjectRepo(rpcClient)
+func ProvideSubscriptionEventsAdapter(pubSubClient *PubSub.Client, cfg *config.Config) *broker.SubscriptionEventsAdapter {
+	return broker.NewSubscriptionEventsAdapter(pubSubClient, cfg.SubscriptionTopicId)
 }
 
 func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
