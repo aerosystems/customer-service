@@ -62,7 +62,7 @@ func (ch CustomerHandler) CreateCustomer(c echo.Context) error {
 	}
 	user, err := ch.customerUsecase.CreateCustomer(req.Uuid)
 	if err != nil {
-		var apiErr CustomErrors.APIError
+		var apiErr CustomErrors.ApiError
 		if errors.As(err, &apiErr) {
 			return ch.ErrorResponse(c, apiErr.HttpCode, apiErr.Message, err)
 		}
