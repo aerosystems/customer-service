@@ -39,7 +39,7 @@ func CustomerToPg(customer *models.Customer) *Customer {
 	}
 }
 
-func (r *CustomerRepo) GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.Customer, error) {
+func (r *CustomerRepo) GetByUuid(_ context.Context, uuid uuid.UUID) (*models.Customer, error) {
 	var user Customer
 	result := r.db.Find(&user, "uuid = ?", uuid.String())
 	if result.Error != nil {
@@ -51,7 +51,7 @@ func (r *CustomerRepo) GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.C
 	return user.ToModel(), nil
 }
 
-func (r *CustomerRepo) Create(ctx context.Context, user *models.Customer) error {
+func (r *CustomerRepo) Create(_ context.Context, user *models.Customer) error {
 	result := r.db.Create(CustomerToPg(user))
 	if result.Error != nil {
 		return result.Error
@@ -59,7 +59,7 @@ func (r *CustomerRepo) Create(ctx context.Context, user *models.Customer) error 
 	return nil
 }
 
-func (r *CustomerRepo) Update(ctx context.Context, user *models.Customer) error {
+func (r *CustomerRepo) Update(_ context.Context, user *models.Customer) error {
 	result := r.db.Save(CustomerToPg(user))
 	if result.Error != nil {
 		return result.Error
@@ -67,7 +67,7 @@ func (r *CustomerRepo) Update(ctx context.Context, user *models.Customer) error 
 	return nil
 }
 
-func (r *CustomerRepo) Delete(ctx context.Context, uuid uuid.UUID) error {
+func (r *CustomerRepo) Delete(_ context.Context, uuid uuid.UUID) error {
 	result := r.db.Delete(&Customer{}, "uuid = ?", uuid.String())
 	if result.Error != nil {
 		return result.Error
