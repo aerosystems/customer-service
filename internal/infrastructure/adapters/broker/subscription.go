@@ -16,14 +16,18 @@ const (
 )
 
 type SubscriptionEventsAdapter struct {
-	pubsubClient *PubSub.Client
-	topicId      string
+	pubsubClient               *PubSub.Client
+	topicId                    string
+	subId                      string
+	createSubscriptionEndpoint string
 }
 
-func NewSubscriptionEventsAdapter(pubsubClient *PubSub.Client, topicId string) *SubscriptionEventsAdapter {
+func NewSubscriptionEventsAdapter(pubsubClient *PubSub.Client, topicId, subId, createSubscriptionEndpoint string) *SubscriptionEventsAdapter {
 	return &SubscriptionEventsAdapter{
-		pubsubClient: pubsubClient,
-		topicId:      topicId,
+		pubsubClient:               pubsubClient,
+		topicId:                    topicId,
+		subId:                      subId,
+		createSubscriptionEndpoint: createSubscriptionEndpoint,
 	}
 }
 
@@ -40,6 +44,7 @@ func (s SubscriptionEventsAdapter) PublishCreateSubscriptionEvent(
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
+
 	topic := s.pubsubClient.Client.Topic(s.topicId)
 	ok, err := topic.Exists(ctx)
 	defer topic.Stop()
@@ -49,6 +54,23 @@ func (s SubscriptionEventsAdapter) PublishCreateSubscriptionEvent(
 	if !ok {
 		if _, err := s.pubsubClient.Client.CreateTopic(ctx, s.topicId); err != nil {
 			return fmt.Errorf("failed to create topic: %w", err)
+		}
+	}
+
+	sub := s.pubsubClient.Client.Subscription(s.subId)
+	ok, err = sub.Exists(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to check if subscription exists: %w", err)
+	}
+	if !ok {
+		if _, err := s.pubsubClient.Client.CreateSubscription(ctx, s.subId, pubsub.SubscriptionConfig{
+			Topic:       topic,
+			AckDeadline: 10 * time.Second,
+			PushConfig: pubsub.PushConfig{
+				Endpoint: s.createSubscriptionEndpoint,
+			},
+		}); err != nil {
+			return fmt.Errorf("failed to create subscription: %w", err)
 		}
 	}
 
