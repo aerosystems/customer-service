@@ -40,10 +40,8 @@ func (cu CustomerUsecase) CreateCustomer(uuidStr string) (customer *models.Custo
 	if err := cu.customerRepo.Create(ctx, customer); err != nil {
 		return nil, err
 	}
-	if err := cu.subscriptionEventsAdapter.PublishCreateSubscriptionEvent(
+	if err := cu.subscriptionEventsAdapter.PublishCreateFreeTrialEvent(
 		customerUuid,
-		models.TrialSubscription,
-		models.OneWeekSubscriptionDuration,
 	); err != nil {
 		cu.log.Errorf("could not publish create subscription event: %v", err)
 	}

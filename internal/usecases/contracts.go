@@ -14,5 +14,5 @@ type CustomerRepository interface {
 }
 
 type SubscriptionEventsAdapter interface {
-	PublishCreateSubscriptionEvent(customerUuid uuid.UUID, subscriptionType models.SubscriptionType, subscriptionDuration models.SubscriptionDuration) error
+	PublishCreateFreeTrialEvent(customerUuid uuid.UUID) error
 }

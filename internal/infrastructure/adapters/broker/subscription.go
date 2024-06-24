@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/aerosystems/customer-service/internal/models"
 	PubSub "github.com/aerosystems/customer-service/pkg/pubsub"
 	"github.com/google/uuid"
 	"time"
@@ -16,31 +15,29 @@ const (
 )
 
 type SubscriptionEventsAdapter struct {
-	pubsubClient               *PubSub.Client
-	topicId                    string
-	subId                      string
-	createSubscriptionEndpoint string
+	pubsubClient              *PubSub.Client
+	topicId                   string
+	subName                   string
+	createFreeTrialEndpoint   string
+	subscriptionServiceApiKey string
 }
 
-func NewSubscriptionEventsAdapter(pubsubClient *PubSub.Client, topicId, subId, createSubscriptionEndpoint string) *SubscriptionEventsAdapter {
+func NewSubscriptionEventsAdapter(pubsubClient *PubSub.Client, topicId, subName, createFreeTrialEndpoint, subscriptionServiceApiKey string) *SubscriptionEventsAdapter {
 	return &SubscriptionEventsAdapter{
-		pubsubClient:               pubsubClient,
-		topicId:                    topicId,
-		subId:                      subId,
-		createSubscriptionEndpoint: createSubscriptionEndpoint,
+		pubsubClient:              pubsubClient,
+		topicId:                   topicId,
+		subName:                   subName,
+		createFreeTrialEndpoint:   createFreeTrialEndpoint,
+		subscriptionServiceApiKey: subscriptionServiceApiKey,
 	}
 }
 
 type CreateSubscriptionEvent struct {
-	CustomerUuid         string `json:"customerUuid"`
-	SubscriptionType     string `json:"subscriptionType"`
-	SubscriptionDuration string `json:"subscriptionDuration"`
+	CustomerUuid string `json:"customerUuid"`
 }
 
-func (s SubscriptionEventsAdapter) PublishCreateSubscriptionEvent(
+func (s SubscriptionEventsAdapter) PublishCreateFreeTrialEvent(
 	customerUuid uuid.UUID,
-	subscriptionType models.SubscriptionType,
-	subscriptionDuration models.SubscriptionDuration,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
@@ -57,17 +54,17 @@ func (s SubscriptionEventsAdapter) PublishCreateSubscriptionEvent(
 		}
 	}
 
-	sub := s.pubsubClient.Client.Subscription(s.subId)
+	sub := s.pubsubClient.Client.Subscription(s.subName)
 	ok, err = sub.Exists(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to check if subscription exists: %w", err)
 	}
 	if !ok {
-		if _, err := s.pubsubClient.Client.CreateSubscription(ctx, s.subId, pubsub.SubscriptionConfig{
+		if _, err := s.pubsubClient.Client.CreateSubscription(ctx, s.subName, pubsub.SubscriptionConfig{
 			Topic:       topic,
 			AckDeadline: 10 * time.Second,
 			PushConfig: pubsub.PushConfig{
-				Endpoint: s.createSubscriptionEndpoint,
+				Endpoint: s.createFreeTrialEndpoint,
 			},
 		}); err != nil {
 			return fmt.Errorf("failed to create subscription: %w", err)
@@ -75,9 +72,7 @@ func (s SubscriptionEventsAdapter) PublishCreateSubscriptionEvent(
 	}
 
 	event := CreateSubscriptionEvent{
-		CustomerUuid:         customerUuid.String(),
-		SubscriptionType:     subscriptionType.String(),
-		SubscriptionDuration: subscriptionDuration.String(),
+		CustomerUuid: customerUuid.String(),
 	}
 	eventData, err := json.Marshal(event)
 	if err != nil {

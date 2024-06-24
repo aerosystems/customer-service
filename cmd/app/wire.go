@@ -60,7 +60,7 @@ func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRe
 }
 
 func ProvideSubscriptionEventsAdapter(pubSubClient *PubSub.Client, cfg *config.Config) *broker.SubscriptionEventsAdapter {
-	return broker.NewSubscriptionEventsAdapter(pubSubClient, cfg.SubscriptionTopicId)
+	return broker.NewSubscriptionEventsAdapter(pubSubClient, cfg.SubscriptionTopicId, cfg.SubscriptionSubName, cfg.SubscriptionCreateFreeTrialEndpoint, cfg.SubscriptionServiceApiKey)
 }
 
 func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
