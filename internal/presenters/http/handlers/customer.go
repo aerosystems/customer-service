@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/models"
@@ -28,7 +29,10 @@ type CreateCustomerRequest struct {
 }
 
 type CreateCustomerRequestBody struct {
-	Customer
+	Message struct {
+		Data []byte `json:"data"`
+	} `json:"message"`
+	Subscription string `json:"subscription"`
 }
 
 type Customer struct {
@@ -60,13 +64,17 @@ func (ch CustomerHandler) CreateCustomer(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return ch.ErrorResponse(c, http.StatusBadRequest, "could not bind request", err)
 	}
-	user, err := ch.customerUsecase.CreateCustomer(req.Uuid)
+	var customerReq Customer
+	if err := json.Unmarshal(req.Message.Data, &customerReq); err != nil {
+		return ch.ErrorResponse(c, http.StatusBadRequest, "could not unmarshal request", err)
+	}
+	customer, err := ch.customerUsecase.CreateCustomer(customerReq.Uuid)
 	if err != nil {
 		var apiErr CustomErrors.ApiError
 		if errors.As(err, &apiErr) {
 			return ch.ErrorResponse(c, apiErr.HttpCode, apiErr.Message, err)
 		}
-		return ch.ErrorResponse(c, http.StatusInternalServerError, "could not create user", err)
+		return ch.ErrorResponse(c, http.StatusInternalServerError, "could not create customer", err)
 	}
-	return ch.SuccessResponse(c, http.StatusCreated, "customer was successfully created", ModelToCustomerResponse(user))
+	return ch.SuccessResponse(c, http.StatusCreated, "customerReq was successfully created", ModelToCustomerResponse(customer))
 }
