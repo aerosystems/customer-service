@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
-	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/models"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -70,11 +68,7 @@ func (ch CustomerHandler) CreateCustomer(c echo.Context) error {
 	}
 	customer, err := ch.customerUsecase.CreateCustomer(customerReq.Uuid)
 	if err != nil {
-		var apiErr CustomErrors.ApiError
-		if errors.As(err, &apiErr) {
-			return ch.ErrorResponse(c, apiErr.HttpCode, apiErr.Message, err)
-		}
-		return ch.ErrorResponse(c, http.StatusInternalServerError, "could not create customer", err)
+		return err
 	}
 	return ch.SuccessResponse(c, http.StatusCreated, "customerReq was successfully created", ModelToCustomerResponse(customer))
 }

@@ -6,6 +6,7 @@ package main
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/config"
 	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/broker"
 	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
@@ -15,6 +16,7 @@ import (
 	"github.com/aerosystems/customer-service/pkg/logger"
 	PubSub "github.com/aerosystems/customer-service/pkg/pubsub"
 	"github.com/google/wire"
+	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,6 +38,7 @@ func InitApp() *App {
 		ProvideBaseHandler,
 		ProvidePubSubClient,
 		ProvideSubscriptionEventsAdapter,
+		ProvideEchoErrorHandler,
 	))
 }
 
@@ -84,7 +87,7 @@ func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 	return client
 }
 
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
+func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
 	panic(wire.Build(HttpServer.NewServer))
 }
 
@@ -94,4 +97,9 @@ func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *handlers.BaseHa
 
 func ProvideCustomerHandler(log *logrus.Logger, baseHandler *handlers.BaseHandler, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
 	panic(wire.Build(handlers.NewCustomerHandler))
+}
+
+func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {
+	customErrorHandler := CustomErrors.NewEchoErrorHandler(cfg.Mode)
+	return &customErrorHandler
 }

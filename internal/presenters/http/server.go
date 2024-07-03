@@ -17,14 +17,19 @@ type Server struct {
 
 func NewServer(
 	log *logrus.Logger,
+	customErrorHandler *echo.HTTPErrorHandler,
 	customerHandler *handlers.CustomerHandler,
 
 ) *Server {
-	return &Server{
+	server := &Server{
 		log:             log,
 		echo:            echo.New(),
 		customerHandler: customerHandler,
 	}
+	if customErrorHandler != nil {
+		server.echo.HTTPErrorHandler = *customErrorHandler
+	}
+	return server
 }
 
 func (s *Server) Run() error {

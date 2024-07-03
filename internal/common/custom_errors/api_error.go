@@ -1,12 +1,14 @@
 package CustomErrors
 
 import (
+	"google.golang.org/grpc/codes"
 	"net/http"
 )
 
 type ApiError struct {
 	Message  string
 	HttpCode int
+	GrpcCode codes.Code
 }
 
 func (e ApiError) Error() string {
@@ -14,6 +16,6 @@ func (e ApiError) Error() string {
 }
 
 var (
-	ErrCustomerAlreadyExists = ApiError{"Customer already exists", http.StatusConflict}
-	ErrCustomerNotFound      = ApiError{"Customer not found", http.StatusNotFound}
+	ErrCustomerAlreadyExists = ApiError{"Customer already exists", http.StatusConflict, codes.AlreadyExists}
+	ErrCustomerNotFound      = ApiError{"Customer not found", http.StatusNotFound, codes.NotFound}
 )
