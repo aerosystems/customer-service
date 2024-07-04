@@ -20,32 +20,26 @@ func NewEchoErrorHandler(mode string) echo.HTTPErrorHandler {
 }
 
 func (h *EchoError) Handler(err error, c echo.Context) {
-	code := http.StatusInternalServerError
-	var message interface{}
-
+	var code int
+	var message map[string]interface{}
 	var httpError *echo.HTTPError
-	if errors.As(err, &httpError) {
+	var apiError *ApiError
+
+	switch {
+	case errors.As(err, &httpError):
 		if httpError.Internal != nil {
 			var herr *echo.HTTPError
 			if errors.As(httpError.Internal, &herr) {
-				httpError = herr
+				code = herr.Code
+				message = map[string]interface{}{"message": herr.Message}
 			}
 		}
-	}
-
-	var apiError *ApiError
-	if errors.As(err, &apiError) {
-		httpError = &echo.HTTPError{
-			Code:    apiError.HttpCode,
-			Message: apiError.Message,
-		}
-	}
-
-	code = httpError.Code
-	message = httpError.Message
-
-	if _, ok := httpError.Message.(string); ok {
-		message = map[string]interface{}{"message": err.Error()}
+	case errors.As(err, &apiError):
+		code = apiError.HttpCode
+		message = map[string]interface{}{"message": apiError.Message}
+	default:
+		code = http.StatusInternalServerError
+		message = map[string]interface{}{"message": "Internal Server Error"}
 	}
 
 	if !c.Response().Committed {
