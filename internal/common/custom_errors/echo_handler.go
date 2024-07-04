@@ -23,16 +23,19 @@ func (h *EchoError) Handler(err error, c echo.Context) {
 	var code int
 	var message map[string]interface{}
 	var httpError *echo.HTTPError
-	var apiError *ApiError
+	var apiError ApiError
 
 	switch {
 	case errors.As(err, &httpError):
 		if httpError.Internal != nil {
-			var herr *echo.HTTPError
-			if errors.As(httpError.Internal, &herr) {
-				code = herr.Code
-				message = map[string]interface{}{"message": herr.Message}
+			var internalError *echo.HTTPError
+			if errors.As(httpError.Internal, &internalError) {
+				code = internalError.Code
+				message = map[string]interface{}{"message": internalError.Message}
 			}
+		} else {
+			code = httpError.Code
+			message = map[string]interface{}{"message": httpError.Message}
 		}
 	case errors.As(err, &apiError):
 		code = apiError.HttpCode
@@ -40,6 +43,9 @@ func (h *EchoError) Handler(err error, c echo.Context) {
 	default:
 		code = http.StatusInternalServerError
 		message = map[string]interface{}{"message": "Internal Server Error"}
+		if h.mode == DevelopmentMode {
+			message = map[string]interface{}{"message": err.Error()}
+		}
 	}
 
 	if !c.Response().Committed {
@@ -52,17 +58,4 @@ func (h *EchoError) Handler(err error, c echo.Context) {
 			c.Echo().Logger.Error(err)
 		}
 	}
-}
-
-func unwrapError(err error) error {
-	originalError := err
-
-	for originalError != nil {
-		internalError := errors.Unwrap(originalError)
-		if internalError == nil {
-			break
-		}
-		originalError = internalError
-	}
-	return originalError
 }

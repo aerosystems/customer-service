@@ -35,7 +35,6 @@ func InitApp() *App {
 		ProvideFireCustomerRepo,
 		ProvideHttpServer,
 		ProvideCustomerHandler,
-		ProvideBaseHandler,
 		ProvidePubSubClient,
 		ProvideSubscriptionEventsAdapter,
 		ProvideEchoErrorHandler,
@@ -91,11 +90,7 @@ func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customErrorHandle
 	panic(wire.Build(HttpServer.NewServer))
 }
 
-func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *handlers.BaseHandler {
-	return handlers.NewBaseHandler(log, cfg.Mode)
-}
-
-func ProvideCustomerHandler(log *logrus.Logger, baseHandler *handlers.BaseHandler, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
+func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
 	panic(wire.Build(handlers.NewCustomerHandler))
 }
 

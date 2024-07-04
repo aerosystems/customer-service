@@ -30,13 +30,12 @@ func InitApp() *App {
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
 	httpErrorHandler := ProvideEchoErrorHandler(config)
-	baseHandler := ProvideBaseHandler(logrusLogger, config)
 	client := ProvideFirestoreClient(config)
 	customerRepo := ProvideFireCustomerRepo(client)
 	pubSubClient := ProvidePubSubClient(config)
 	subscriptionEventsAdapter := ProvideSubscriptionEventsAdapter(pubSubClient, config)
 	customerUsecase := ProvideCustomerUsecase(logrusLogger, customerRepo, subscriptionEventsAdapter)
-	customerHandler := ProvideCustomerHandler(logrusLogger, baseHandler, customerUsecase)
+	customerHandler := ProvideCustomerHandler(logrusLogger, customerUsecase)
 	server := ProvideHttpServer(logrusLogger, config, httpErrorHandler, customerHandler)
 	app := ProvideApp(logrusLogger, config, server)
 	return app
@@ -72,8 +71,8 @@ func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customErrorHandle
 	return server
 }
 
-func ProvideCustomerHandler(log *logrus.Logger, baseHandler *handlers.BaseHandler, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
-	customerHandler := handlers.NewCustomerHandler(baseHandler, customerUsecase)
+func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
+	customerHandler := handlers.NewCustomerHandler(customerUsecase)
 	return customerHandler
 }
 
@@ -102,10 +101,6 @@ func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 		panic(err)
 	}
 	return client
-}
-
-func ProvideBaseHandler(log *logrus.Logger, cfg *config.Config) *handlers.BaseHandler {
-	return handlers.NewBaseHandler(log, cfg.Mode)
 }
 
 func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {

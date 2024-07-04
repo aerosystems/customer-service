@@ -8,16 +8,13 @@ import (
 )
 
 type CustomerHandler struct {
-	*BaseHandler
 	customerUsecase CustomerUsecase
 }
 
 func NewCustomerHandler(
-	baseHandler *BaseHandler,
 	customerUsecase CustomerUsecase,
 ) *CustomerHandler {
 	return &CustomerHandler{
-		BaseHandler:     baseHandler,
 		customerUsecase: customerUsecase,
 	}
 }
@@ -51,24 +48,26 @@ func ModelToCustomerResponse(user *models.Customer) *Customer {
 // @Produce application/json
 // @Security BearerAuth
 // @Param raw body handlers.CreateCustomerRequestBody true "Create user"
-// @Success 201 {object} handlers.Response{data=handlers.Customer}
-// @Failure 400 {object} handlers.ErrorResponse
-// @Failure 401 {object} handlers.ErrorResponse
-// @Failure 403 {object} handlers.ErrorResponse
-// @Failure 500 {object} handlers.ErrorResponse
+// @Success 201 {object} handlers.Customer
+// @Failure 400 {object} echo.HTTPError
+// @Failure 401 {object} echo.HTTPError
+// @Failure 403 {object} echo.HTTPError
+// @Failure 500 {object} echo.HTTPError
 // @Router /v1/customers [post]
 func (ch CustomerHandler) CreateCustomer(c echo.Context) error {
 	var req CreateCustomerRequest
 	if err := c.Bind(&req); err != nil {
-		return ch.ErrorResponse(c, http.StatusBadRequest, "could not bind request", err)
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, "could not bind request")
 	}
+
 	var customerReq Customer
 	if err := json.Unmarshal(req.Message.Data, &customerReq); err != nil {
-		return ch.ErrorResponse(c, http.StatusBadRequest, "could not unmarshal request", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "could not unmarshal request")
 	}
+
 	customer, err := ch.customerUsecase.CreateCustomer(customerReq.Uuid)
 	if err != nil {
 		return err
 	}
-	return ch.SuccessResponse(c, http.StatusCreated, "customerReq was successfully created", ModelToCustomerResponse(customer))
+	return c.JSON(http.StatusCreated, ModelToCustomerResponse(customer))
 }
