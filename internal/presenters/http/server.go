@@ -17,7 +17,7 @@ type Server struct {
 
 func NewServer(
 	log *logrus.Logger,
-	customErrorHandler *echo.HTTPErrorHandler,
+	errorHandler *echo.HTTPErrorHandler,
 	customerHandler *handlers.CustomerHandler,
 
 ) *Server {
@@ -26,8 +26,8 @@ func NewServer(
 		echo:            echo.New(),
 		customerHandler: customerHandler,
 	}
-	if customErrorHandler != nil {
-		server.echo.HTTPErrorHandler = *customErrorHandler
+	if errorHandler != nil {
+		server.echo.HTTPErrorHandler = *errorHandler
 	}
 	return server
 }

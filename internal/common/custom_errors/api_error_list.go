@@ -1,6 +1,6 @@
 package CustomErrors
 
-var list = []ApiError{
+var apiErrors = []ApiError{
 	ErrCustomerAlreadyExists,
 	ErrCustomerNotFound,
 }

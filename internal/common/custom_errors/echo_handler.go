@@ -14,7 +14,7 @@ type EchoError struct {
 func NewEchoErrorHandler(mode string) echo.HTTPErrorHandler {
 	e := EchoError{
 		mode:   NewEchoHandlerMode(mode),
-		errors: list,
+		errors: apiErrors,
 	}
 	return e.Handler
 }
