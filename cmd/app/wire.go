@@ -86,8 +86,8 @@ func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 	return client
 }
 
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
-	panic(wire.Build(HttpServer.NewServer))
+func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
+	return HttpServer.NewServer(cfg.WebPort, log, customErrorHandler, customerHandler)
 }
 
 func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {

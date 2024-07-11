@@ -36,7 +36,7 @@ func InitApp() *App {
 	subscriptionEventsAdapter := ProvideSubscriptionEventsAdapter(pubSubClient, config)
 	customerUsecase := ProvideCustomerUsecase(logrusLogger, customerRepo, subscriptionEventsAdapter)
 	customerHandler := ProvideCustomerHandler(logrusLogger, customerUsecase)
-	server := ProvideHttpServer(logrusLogger, config, httpErrorHandler, customerHandler)
+	server := ProvideHttpServer(config, logrusLogger, httpErrorHandler, customerHandler)
 	app := ProvideApp(logrusLogger, config, server)
 	return app
 }
@@ -64,11 +64,6 @@ func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRe
 func ProvideFireCustomerRepo(client *firestore.Client) *fire.CustomerRepo {
 	customerRepo := fire.NewCustomerRepo(client)
 	return customerRepo
-}
-
-func ProvideHttpServer(log *logrus.Logger, cfg *config.Config, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
-	server := HttpServer.NewServer(log, customErrorHandler, customerHandler)
-	return server
 }
 
 func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
@@ -101,6 +96,10 @@ func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 		panic(err)
 	}
 	return client
+}
+
+func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
+	return HttpServer.NewServer(cfg.WebPort, log, customErrorHandler, customerHandler)
 }
 
 func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {

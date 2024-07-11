@@ -7,21 +7,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const webPort = 80
-
 type Server struct {
+	port            int
 	log             *logrus.Logger
 	echo            *echo.Echo
 	customerHandler *handlers.CustomerHandler
 }
 
 func NewServer(
+	port int,
 	log *logrus.Logger,
 	errorHandler *echo.HTTPErrorHandler,
 	customerHandler *handlers.CustomerHandler,
 
 ) *Server {
 	server := &Server{
+		port:            port,
 		log:             log,
 		echo:            echo.New(),
 		customerHandler: customerHandler,
@@ -35,6 +36,5 @@ func NewServer(
 func (s *Server) Run() error {
 	s.setupMiddleware()
 	s.setupRoutes()
-	s.log.Infof("starting HTTP server customer-service on port %d\n", webPort)
-	return s.echo.Start(fmt.Sprintf(":%d", webPort))
+	return s.echo.Start(fmt.Sprintf(":%d", s.port))
 }
