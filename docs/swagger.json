@@ -14,19 +14,19 @@
             "name": "Apache 2.0",
             "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "1.0.0"
+        "version": "1.0.1"
     },
-    "host": "gw.verifire.com/customer",
+    "host": "gw.verifire.dev/customer",
     "basePath": "/",
     "paths": {
         "/v1/customers": {
-            "get": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get user",
+                "description": "Create user",
                 "consumes": [
                     "application/json"
                 ],
@@ -36,42 +36,47 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "Get user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "Create user",
+                        "name": "raw",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handlers.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.Customer"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/handlers.CreateCustomerRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Customer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -79,19 +84,37 @@
         }
     },
     "definitions": {
-        "handlers.Response": {
+        "handlers.CreateCustomerRequestBody": {
             "type": "object",
             "properties": {
-                "data": {},
                 "message": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "subscription": {
                     "type": "string"
                 }
             }
         },
-        "models.Customer": {
+        "handlers.Customer": {
             "type": "object",
             "properties": {
                 "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }

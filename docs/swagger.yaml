@@ -1,17 +1,28 @@
 basePath: /
 definitions:
-  handlers.Response:
+  handlers.CreateCustomerRequestBody:
     properties:
-      data: {}
       message:
+        properties:
+          data:
+            items:
+              type: integer
+            type: array
+        type: object
+      subscription:
         type: string
     type: object
-  models.Customer:
+  handlers.Customer:
     properties:
       uuid:
         type: string
     type: object
-host: gw.verifire.com/customer
+  handlers.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: gw.verifire.dev/customer
 info:
   contact:
     name: Artem Kostenko
@@ -22,40 +33,46 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   title: Customer Service
-  version: 1.0.0
+  version: 1.0.1
 paths:
   /v1/customers:
-    get:
+    post:
       consumes:
       - application/json
-      description: Get user
+      description: Create user
+      parameters:
+      - description: Create user
+        in: body
+        name: raw
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateCustomerRequestBody'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            allOf:
-            - $ref: '#/definitions/handlers.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.Customer'
-              type: object
+            $ref: '#/definitions/handlers.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.Response'
+            $ref: '#/definitions/handlers.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/handlers.Response'
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.Response'
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Get user
+      summary: Create user
       tags:
       - users
 schemes:

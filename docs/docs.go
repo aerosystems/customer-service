@@ -23,13 +23,13 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/v1/customers": {
-            "get": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get user",
+                "description": "Create user",
                 "consumes": [
                     "application/json"
                 ],
@@ -39,42 +39,47 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Get user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "Create user",
+                        "name": "raw",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handlers.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.Customer"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/handlers.CreateCustomerRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Customer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Response"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -82,19 +87,37 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.Response": {
+        "handlers.CreateCustomerRequestBody": {
             "type": "object",
             "properties": {
-                "data": {},
                 "message": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "subscription": {
                     "type": "string"
                 }
             }
         },
-        "models.Customer": {
+        "handlers.Customer": {
             "type": "object",
             "properties": {
                 "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -112,8 +135,8 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0.0",
-	Host:             "gw.verifire.com/customer",
+	Version:          "1.0.1",
+	Host:             "gw.verifire.dev/customer",
 	BasePath:         "/",
 	Schemes:          []string{"https"},
 	Title:            "Customer Service",
