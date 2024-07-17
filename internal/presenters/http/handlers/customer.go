@@ -49,10 +49,10 @@ func ModelToCustomerResponse(user *models.Customer) *Customer {
 // @Security BearerAuth
 // @Param raw body handlers.CreateCustomerRequestBody true "Create user"
 // @Success 201 {object} handlers.Customer
-// @Failure 400 {object} echo.HTTPError
-// @Failure 401 {object} echo.HTTPError
-// @Failure 403 {object} echo.HTTPError
-// @Failure 500 {object} echo.HTTPError
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 403 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
 // @Router /v1/customers [post]
 func (ch CustomerHandler) CreateCustomer(c echo.Context) error {
 	var req CreateCustomerRequest

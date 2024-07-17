@@ -55,19 +55,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handlers.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/handlers.Customer"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/handlers.Customer"
                         }
                     },
                     "400": {
@@ -102,7 +90,18 @@ const docTemplate = `{
         "handlers.CreateCustomerRequestBody": {
             "type": "object",
             "properties": {
-                "uuid": {
+                "message": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "subscription": {
                     "type": "string"
                 }
             }
@@ -118,19 +117,6 @@ const docTemplate = `{
         "handlers.ErrorResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "error": {},
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
                 "message": {
                     "type": "string"
                 }
@@ -149,7 +135,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "2.0.0",
+	Version:          "1.0.1",
 	Host:             "gw.verifire.dev/customer",
 	BasePath:         "/",
 	Schemes:          []string{"https"},

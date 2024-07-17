@@ -14,7 +14,7 @@
             "name": "Apache 2.0",
             "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "2.0.0"
+        "version": "1.0.1"
     },
     "host": "gw.verifire.dev/customer",
     "basePath": "/",
@@ -52,19 +52,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handlers.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/handlers.Customer"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/handlers.Customer"
                         }
                     },
                     "400": {
@@ -99,7 +87,18 @@
         "handlers.CreateCustomerRequestBody": {
             "type": "object",
             "properties": {
-                "uuid": {
+                "message": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "subscription": {
                     "type": "string"
                 }
             }
@@ -115,19 +114,6 @@
         "handlers.ErrorResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "error": {},
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
                 "message": {
                     "type": "string"
                 }

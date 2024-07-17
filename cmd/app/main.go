@@ -6,7 +6,7 @@ import (
 )
 
 // @title Customer Service
-// @version 2.0.0
+// @version 1.0.1
 // @description A part of microservice infrastructure, who responsible for customer user entity.
 
 // @contact.name Artem Kostenko
