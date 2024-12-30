@@ -1,0 +1,47 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: "%APP_NAME%"
+  labels:
+    cloud.googleapis.com/location: europe-west1
+  annotations:
+    run.googleapis.com/client-name: cloud-console
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/client-name: cloud-console
+        autoscaling.knative.dev/maxScale: '1'
+        run.googleapis.com/startup-cpu-boost: 'true'
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/sessionAffinity: 'true'
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/network-interfaces: '[{"network":"default","subnetwork":"default"}]'
+    spec:
+      containerConcurrency: 1000
+      timeoutSeconds: 300
+      serviceAccountName: customer-service@verifire-60d1b.iam.gserviceaccount.com
+      containers:
+        - name: speedtest-service
+          image: "%IMAGE%"
+          ports:
+            - name: http1
+              containerPort: 8080
+          env:
+            - name: CSTMR_MODE
+              value: "dev"
+            - name: CSTMR_SUBSCRIPTION_TOPIC_ID
+              value: "subscription-topic"
+            - name: CSTMR_SUBSCRIPTION_SUB_NAME
+              value: "subscription-sub"
+            - name: CSTMR_SUBSCRIPTION_CREATE_FREE_TRIAL_ENDPOINT
+              value: "http://subscription-service:8080/v1/subscriptions/create-free-trial"
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+  traffic:
+    - percent: 100
+      latestRevision: true
