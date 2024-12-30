@@ -18,7 +18,7 @@ spec:
         run.googleapis.com/execution-environment: gen2
         run.googleapis.com/sessionAffinity: 'true'
         run.googleapis.com/vpc-access-egress: private-ranges-only
-        run.googleapis.com/network-interfaces: '[{"network":"default","subnetwork":"default"}]'
+        run.googleapis.com/network-interfaces: '[{"network":"default"}]'
     spec:
       containerConcurrency: 1000
       timeoutSeconds: 300
