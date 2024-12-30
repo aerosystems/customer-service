@@ -22,7 +22,7 @@ spec:
     spec:
       containerConcurrency: 1000
       timeoutSeconds: 300
-      serviceAccountName: customer-service@verifire-60d1b.iam.gserviceaccount.com
+      serviceAccountName: 244108678816-compute@developer.gserviceaccount.com
       containers:
         - name: speedtest-service
           image: "%IMAGE%"
