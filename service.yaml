@@ -29,6 +29,8 @@ spec:
             - name: http1
               containerPort: 8080
           env:
+            - name: GCP_PROJECT_ID
+              value: verifire-60d1b
             - name: CSTMR_SUBSCRIPTION_TOPIC_ID
               value: subscription-topic
             - name: CSTMR_SUBSCRIPTION_SUB_NAME
