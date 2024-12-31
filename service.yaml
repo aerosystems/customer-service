@@ -17,7 +17,7 @@ spec:
         autoscaling.knative.dev/maxScale: '100'
         run.googleapis.com/execution-environment: gen2
         run.googleapis.com/client-name: cloud-console
-        run.googleapis.com/startup-cpu-boost: 'true
+        run.googleapis.com/startup-cpu-boost: 'true'
     spec:
       containerConcurrency: 1000
       timeoutSeconds: 300
