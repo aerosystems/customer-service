@@ -9,10 +9,10 @@ package main
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"github.com/aerosystems/customer-service/internal/adapters/broker"
+	"github.com/aerosystems/customer-service/internal/adapters/firestore_repo"
+	"github.com/aerosystems/customer-service/internal/common/config"
 	"github.com/aerosystems/customer-service/internal/common/custom_errors"
-	"github.com/aerosystems/customer-service/internal/config"
-	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/broker"
-	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
 	"github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
@@ -35,8 +35,8 @@ func InitApp() *App {
 	pubSubClient := ProvidePubSubClient(config)
 	subscriptionEventsAdapter := ProvideSubscriptionEventsAdapter(pubSubClient, config)
 	customerUsecase := ProvideCustomerUsecase(logrusLogger, customerRepo, subscriptionEventsAdapter)
-	customerHandler := ProvideCustomerHandler(logrusLogger, customerUsecase)
-	server := ProvideHttpServer(config, logrusLogger, httpErrorHandler, customerHandler)
+	firebaseHandler := ProvideCustomerHandler(logrusLogger, customerUsecase)
+	server := ProvideHttpServer(config, logrusLogger, httpErrorHandler, firebaseHandler)
 	app := ProvideApp(logrusLogger, config, server)
 	return app
 }
@@ -61,14 +61,14 @@ func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRe
 	return customerUsecase
 }
 
-func ProvideFireCustomerRepo(client *firestore.Client) *fire.CustomerRepo {
-	customerRepo := fire.NewCustomerRepo(client)
+func ProvideFireCustomerRepo(client *firestore.Client) *FirestoreRepo.CustomerRepo {
+	customerRepo := FirestoreRepo.NewCustomerRepo(client)
 	return customerRepo
 }
 
-func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
-	customerHandler := handlers.NewCustomerHandler(customerUsecase)
-	return customerHandler
+func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.FirebaseHandler {
+	firebaseHandler := handlers.NewFirebaseHandler(customerUsecase)
+	return firebaseHandler
 }
 
 // wire.go:
@@ -98,7 +98,7 @@ func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
 	return client
 }
 
-func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
+func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.FirebaseHandler) *HttpServer.Server {
 	return HttpServer.NewServer(cfg.WebPort, log, customErrorHandler, customerHandler)
 }
 

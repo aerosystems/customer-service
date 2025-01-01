@@ -47,7 +47,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateCustomerRequestBody"
+                            "$ref": "#/definitions/handlers.CreateFirebaseCustomerRequestBody"
                         }
                     }
                 ],
@@ -87,7 +87,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.CreateCustomerRequestBody": {
+        "handlers.CreateFirebaseCustomerRequestBody": {
             "type": "object",
             "properties": {
                 "message": {

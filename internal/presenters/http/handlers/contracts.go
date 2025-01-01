@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"github.com/aerosystems/customer-service/internal/models"
+	"context"
 )
 
 type CustomerUsecase interface {
-	CreateCustomer(uuid string) (*models.Customer, error)
+	CreateCustomer(ctx context.Context, email, firebaseUID string) error
 }

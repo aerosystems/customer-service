@@ -2,14 +2,14 @@ package usecases
 
 import (
 	"context"
-	"github.com/aerosystems/customer-service/internal/models"
+	"github.com/aerosystems/customer-service/internal/domain"
 	"github.com/google/uuid"
 )
 
 type CustomerRepository interface {
-	GetByUuid(ctx context.Context, uuid uuid.UUID) (*models.Customer, error)
-	Create(ctx context.Context, user *models.Customer) error
-	Update(ctx context.Context, user *models.Customer) error
+	GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.Customer, error)
+	Create(ctx context.Context, user *domain.Customer) error
+	Update(ctx context.Context, user *domain.Customer) error
 	Delete(ctx context.Context, uuid uuid.UUID) error
 }
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/aerosystems/customer-service/internal/config"
+	"github.com/aerosystems/customer-service/internal/common/config"
 	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/sirupsen/logrus"
 )

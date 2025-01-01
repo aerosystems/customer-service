@@ -11,21 +11,21 @@ type Server struct {
 	port            int
 	log             *logrus.Logger
 	echo            *echo.Echo
-	customerHandler *handlers.CustomerHandler
+	firebaseHandler *handlers.FirebaseHandler
 }
 
 func NewServer(
 	port int,
 	log *logrus.Logger,
 	errorHandler *echo.HTTPErrorHandler,
-	customerHandler *handlers.CustomerHandler,
+	customerHandler *handlers.FirebaseHandler,
 
 ) *Server {
 	server := &Server{
 		port:            port,
 		log:             log,
 		echo:            echo.New(),
-		customerHandler: customerHandler,
+		firebaseHandler: customerHandler,
 	}
 	if errorHandler != nil {
 		server.echo.HTTPErrorHandler = *errorHandler
