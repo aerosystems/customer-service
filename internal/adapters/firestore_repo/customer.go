@@ -33,7 +33,7 @@ type Customer struct {
 	Email       string     `firestore:"email"`
 	FirebaseUID string     `firestore:"firebase_uid"`
 	CreatedAt   time.Time  `firestore:"created_at"`
-	DeleteAt    *time.Time `firestore:"delete_at, omitempty"`
+	DeleteAt    *time.Time `firestore:"delete_at,omitempty"`
 }
 
 func (c *Customer) ToModel() *domain.Customer {

@@ -14,12 +14,14 @@ type EventBody struct {
 }
 
 type Customer struct {
-	Uuid string `json:"uuid"`
+	Email string `json:"email"`
+	UID   string `json:"uid"`
 }
 
 func main() {
 	customer := Customer{
-		Uuid: uuid.New().String(),
+		Email: "customer@gmail.com",
+		UID:   uuid.New().String(),
 	}
 
 	data, err := json.Marshal(customer)

@@ -6,10 +6,10 @@ package main
 import (
 	"cloud.google.com/go/firestore"
 	"context"
-	"github.com/aerosystems/customer-service/internal/common/config"
-	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/adapters/broker"
 	FirestoreRepo "github.com/aerosystems/customer-service/internal/adapters/firestore_repo"
+	"github.com/aerosystems/customer-service/internal/common/config"
+	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
