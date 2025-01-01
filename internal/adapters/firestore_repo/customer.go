@@ -51,6 +51,7 @@ func CustomerToFirestore(customer *domain.Customer) *Customer {
 		Email:       customer.Email,
 		FirebaseUID: customer.FirebaseUID,
 		CreatedAt:   customer.CreatedAt,
+		DeleteAt:    nil,
 	}
 }
 
