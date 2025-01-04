@@ -7,7 +7,6 @@
 proto:
 	@protoc --go_out=internal/common/protobuf --go-grpc_out=internal/common/protobuf -I api/protobuf project.proto
 
-
 ##lint-fix: runs linter with fix some issues
 lint-fix:
 	@golangci-lint run --fix
