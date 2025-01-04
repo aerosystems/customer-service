@@ -1,4 +1,4 @@
-package FirestoreRepo
+package adapters
 
 import (
 	"cloud.google.com/go/firestore"
@@ -18,12 +18,12 @@ const (
 	customersCollectionName = "customers"
 )
 
-type CustomerRepo struct {
+type FirestoreCustomerRepo struct {
 	client *firestore.Client
 }
 
-func NewCustomerRepo(client *firestore.Client) *CustomerRepo {
-	return &CustomerRepo{
+func NewFirestoreCustomerRepo(client *firestore.Client) *FirestoreCustomerRepo {
+	return &FirestoreCustomerRepo{
 		client: client,
 	}
 }
@@ -55,10 +55,10 @@ func CustomerToFirestore(customer *domain.Customer) *Customer {
 	}
 }
 
-func (r *CustomerRepo) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.Customer, error) {
+func (fcr *FirestoreCustomerRepo) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.Customer, error) {
 	c, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
-	docRef := r.client.Collection(customersCollectionName).Doc(uuid.String())
+	docRef := fcr.client.Collection(customersCollectionName).Doc(uuid.String())
 	doc, err := docRef.Get(c)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
@@ -79,8 +79,8 @@ func (r *CustomerRepo) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.C
 	return customer.ToModel(), nil
 }
 
-func (r *CustomerRepo) Create(ctx context.Context, customer *domain.Customer) error {
-	currentCustomer, err := r.GetByUUID(ctx, customer.UUID)
+func (fcr *FirestoreCustomerRepo) Create(ctx context.Context, customer *domain.Customer) error {
+	currentCustomer, err := fcr.GetByUUID(ctx, customer.UUID)
 	if err != nil && !errors.Is(err, CustomErrors.ErrCustomerNotFound) {
 		return err
 	}
@@ -90,22 +90,22 @@ func (r *CustomerRepo) Create(ctx context.Context, customer *domain.Customer) er
 	c, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	_, err = r.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(c, CustomerToFirestore(customer))
+	_, err = fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(c, CustomerToFirestore(customer))
 	return err
 }
 
-func (r *CustomerRepo) Update(ctx context.Context, customer *domain.Customer) error {
+func (fcr *FirestoreCustomerRepo) Update(ctx context.Context, customer *domain.Customer) error {
 	c, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	_, err := r.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(c, CustomerToFirestore(customer))
+	_, err := fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(c, CustomerToFirestore(customer))
 	return err
 }
 
-func (r *CustomerRepo) Delete(ctx context.Context, uuid uuid.UUID) error {
+func (fcr *FirestoreCustomerRepo) Delete(ctx context.Context, uuid uuid.UUID) error {
 	c, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	_, err := r.client.Collection(customersCollectionName).Doc(uuid.String()).Delete(c)
+	_, err := fcr.client.Collection(customersCollectionName).Doc(uuid.String()).Delete(c)
 	return err
 }

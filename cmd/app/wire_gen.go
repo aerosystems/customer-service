@@ -9,17 +9,16 @@ package main
 import (
 	"cloud.google.com/go/firestore"
 	"context"
-	"github.com/aerosystems/customer-service/internal/adapters/broker"
-	"github.com/aerosystems/customer-service/internal/adapters/firestore_repo"
+	"github.com/aerosystems/customer-service/internal/adapters"
 	"github.com/aerosystems/customer-service/internal/common/config"
 	"github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/logger"
-	"github.com/aerosystems/customer-service/pkg/pubsub"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 // Injectors from wire.go:
@@ -31,10 +30,10 @@ func InitApp() *App {
 	config := ProvideConfig()
 	httpErrorHandler := ProvideEchoErrorHandler(config)
 	client := ProvideFirestoreClient(config)
-	customerRepo := ProvideFireCustomerRepo(client)
-	pubSubClient := ProvidePubSubClient(config)
-	subscriptionEventsAdapter := ProvideSubscriptionEventsAdapter(pubSubClient, config)
-	customerUsecase := ProvideCustomerUsecase(logrusLogger, customerRepo, subscriptionEventsAdapter)
+	firestoreCustomerRepo := ProvideFirestoreCustomerRepo(client)
+	subscriptionAdapter := ProvideSubscriptionAdapter(config)
+	projectAdapter := ProvideProjectAdapter(config)
+	customerUsecase := ProvideCustomerUsecase(logrusLogger, firestoreCustomerRepo, subscriptionAdapter, projectAdapter)
 	firebaseHandler := ProvideCustomerHandler(logrusLogger, customerUsecase)
 	server := ProvideHttpServer(config, logrusLogger, httpErrorHandler, firebaseHandler)
 	app := ProvideApp(logrusLogger, config, server)
@@ -56,14 +55,14 @@ func ProvideConfig() *config.Config {
 	return configConfig
 }
 
-func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionEventsAdapter usecases.SubscriptionEventsAdapter) *usecases.CustomerUsecase {
-	customerUsecase := usecases.NewCustomerUsecase(log, customerRepo, subscriptionEventsAdapter)
+func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter) *usecases.CustomerUsecase {
+	customerUsecase := usecases.NewCustomerUsecase(log, customerRepo, subscriptionAdapter, projectAdapter)
 	return customerUsecase
 }
 
-func ProvideFireCustomerRepo(client *firestore.Client) *FirestoreRepo.CustomerRepo {
-	customerRepo := FirestoreRepo.NewCustomerRepo(client)
-	return customerRepo
+func ProvideFirestoreCustomerRepo(client *firestore.Client) *adapters.FirestoreCustomerRepo {
+	firestoreCustomerRepo := adapters.NewFirestoreCustomerRepo(client)
+	return firestoreCustomerRepo
 }
 
 func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.FirebaseHandler {
@@ -73,12 +72,24 @@ func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.Custome
 
 // wire.go:
 
-func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
-	return log.Logger
+func ProvideSubscriptionAdapter(cfg *config.Config) *adapters.SubscriptionAdapter {
+	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.ProjectServiceGRPCAddr, grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	return subscriptionAdapter
 }
 
-func ProvideSubscriptionEventsAdapter(pubSubClient *PubSub.Client, cfg *config.Config) *broker.SubscriptionEventsAdapter {
-	return broker.NewSubscriptionEventsAdapter(pubSubClient, cfg.SubscriptionTopicId, cfg.SubscriptionSubName, cfg.SubscriptionCreateFreeTrialEndpoint, cfg.SubscriptionServiceApiKey)
+func ProvideProjectAdapter(cfg *config.Config) *adapters.ProjectAdapter {
+	projectAdapter, err := adapters.NewProjectAdapter(cfg.ProjectServiceGRPCAddr, grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	return projectAdapter
+}
+
+func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
+	return log.Logger
 }
 
 func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
@@ -90,16 +101,8 @@ func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
 	return client
 }
 
-func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
-	client, err := PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
-	if err != nil {
-		panic(err)
-	}
-	return client
-}
-
 func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.FirebaseHandler) *HttpServer.Server {
-	return HttpServer.NewServer(cfg.WebPort, log, customErrorHandler, customerHandler)
+	return HttpServer.NewServer(cfg.Port, log, customErrorHandler, customerHandler)
 }
 
 func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {

@@ -5,39 +5,35 @@ import (
 )
 
 const (
-	defaultMode    = "prod"
-	defaultWebPort = 8080
+	defaultMode = "prod"
+	defaultPort = 8080
 )
 
 type Config struct {
-	Mode                                string
-	WebPort                             int
-	GcpProjectId                        string
-	GoogleApplicationCredentials        string
-	SubscriptionTopicId                 string
-	SubscriptionSubName                 string
-	SubscriptionCreateFreeTrialEndpoint string
-	SubscriptionServiceApiKey           string
+	Mode string
+	Port int
+
+	GcpProjectId                 string
+	GoogleApplicationCredentials string
+
+	ProjectServiceGRPCAddr string
 }
 
 func NewConfig() *Config {
 	viper.AutomaticEnv()
-	mode := viper.GetString("CSTMR_MODE")
+	mode := viper.GetString("MODE")
 	if mode == "" {
 		mode = defaultMode
 	}
 	webPort := viper.GetInt("PORT")
 	if webPort == 0 {
-		webPort = defaultWebPort
+		webPort = defaultPort
 	}
 	return &Config{
-		Mode:                                mode,
-		WebPort:                             webPort,
-		GcpProjectId:                        viper.GetString("GCP_PROJECT_ID"),
-		GoogleApplicationCredentials:        viper.GetString("GOOGLE_APPLICATION_CREDENTIALS"),
-		SubscriptionTopicId:                 viper.GetString("CSTMR_SUBSCRIPTION_TOPIC_ID"),
-		SubscriptionSubName:                 viper.GetString("CSTMR_SUBSCRIPTION_SUB_NAME"),
-		SubscriptionCreateFreeTrialEndpoint: viper.GetString("CSTMR_SUBSCRIPTION_CREATE_FREE_TRIAL_ENDPOINT"),
-		SubscriptionServiceApiKey:           viper.GetString("SBS_API_KEY"),
+		Mode:                         mode,
+		Port:                         webPort,
+		GcpProjectId:                 viper.GetString("GCP_PROJECT_ID"),
+		GoogleApplicationCredentials: viper.GetString("GOOGLE_APPLICATION_CREDENTIALS"),
+		ProjectServiceGRPCAddr:       viper.GetString("PROJECT_SERVICE_GRPC_ADDR"),
 	}
 }

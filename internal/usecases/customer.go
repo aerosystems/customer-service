@@ -3,31 +3,62 @@ package usecases
 import (
 	"context"
 	"github.com/aerosystems/customer-service/internal/domain"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 type CustomerUsecase struct {
-	log                       *logrus.Logger
-	customerRepo              CustomerRepository
-	subscriptionEventsAdapter SubscriptionEventsAdapter
+	log                 *logrus.Logger
+	customerRepo        CustomerRepository
+	subscriptionAdapter SubscriptionAdapter
+	projectAdapter      ProjectAdapter
 }
 
 func NewCustomerUsecase(
 	log *logrus.Logger,
 	customerRepo CustomerRepository,
-	subscriptionEventsAdapter SubscriptionEventsAdapter,
+	subscriptionAdapter SubscriptionAdapter,
+	projectAdapter ProjectAdapter,
 ) *CustomerUsecase {
 	return &CustomerUsecase{
-		log:                       log,
-		customerRepo:              customerRepo,
-		subscriptionEventsAdapter: subscriptionEventsAdapter,
+		log:                 log,
+		customerRepo:        customerRepo,
+		subscriptionAdapter: subscriptionAdapter,
+		projectAdapter:      projectAdapter,
 	}
 }
 
 func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID string) error {
 	customer := domain.NewCustomer(email, firebaseUID)
-	if err := cu.customerRepo.Create(ctx, customer); err != nil {
+	var subscriptionUUID, projectUUID uuid.UUID
+	var err error
+	defer func() {
+		if err != nil {
+			cu.compensationCreateCustomerError(ctx, err, subscriptionUUID, projectUUID)
+		}
+	}()
+	//if subscriptionUUID, err = cu.subscriptionAdapter.CreateFreeTrialSubscription(ctx, customer.UUID); err != nil {
+	//	return err
+	//}
+	if projectUUID, err = cu.projectAdapter.CreateDefaultProject(ctx, customer.UUID); err != nil {
+		return err
+	}
+	if err = cu.customerRepo.Create(ctx, customer); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (cu CustomerUsecase) compensationCreateCustomerError(ctx context.Context, err error, subscriptionUUID, projectUUID uuid.UUID) {
+	cu.log.WithError(err).Error("Failed creating customer error: %v", err)
+	if subscriptionUUID != uuid.Nil {
+		if compErr := cu.subscriptionAdapter.DeleteSubscription(ctx, subscriptionUUID); err != nil {
+			cu.log.WithError(compErr).Error("Failed compensation creating subscription error: %v", err)
+		}
+	}
+	if projectUUID != uuid.Nil {
+		if compErr := cu.projectAdapter.DeleteProject(ctx, projectUUID); err != nil {
+			cu.log.WithError(compErr).Error("Failed compensation creating project error: %v", err)
+		}
+	}
 }

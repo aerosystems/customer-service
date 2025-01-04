@@ -29,23 +29,14 @@ spec:
             - name: http1
               containerPort: 8080
           env:
+            - name: MODE
+              value: dev
             - name: GCP_PROJECT_ID
               value: verifire-60d1b
-            - name: CSTMR_SUBSCRIPTION_TOPIC_ID
-              value: subscription-topic
-            - name: CSTMR_SUBSCRIPTION_SUB_NAME
-              value: subscription-sub
-            - name: CSTMR_SUBSCRIPTION_CREATE_FREE_TRIAL_ENDPOINT
-              value: http://subscription-service:8080/v1/subscriptions/create-free-trial
-            - name: CSTMR_MODE
-              value: dev
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /app/secret/verifire-60d1b-3a7b22c9842d
-            - name: SBS_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: '1'
-                  name: sbs-api-key
+            - name: PROJECT_SERVICE_GRPC_ADDR
+              value: https://project-service-grpc-244108678816.europe-west1.run.app:50051
           resources:
             limits:
               cpu: 1000m
