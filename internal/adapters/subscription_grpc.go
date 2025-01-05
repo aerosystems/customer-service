@@ -2,19 +2,46 @@ package adapters
 
 import (
 	"context"
+	"github.com/aerosystems/customer-service/internal/common/protobuf/subscription"
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
 )
 
 type SubscriptionAdapter struct {
+	client subscription.SubscriptionServiceClient
 }
 
 func NewSubscriptionAdapter(address string) (*SubscriptionAdapter, error) {
-	return &SubscriptionAdapter{}, nil
+	conn, err := grpc.NewClient(address,
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:    30,
+			Timeout: 30,
+		}),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &SubscriptionAdapter{
+		client: subscription.NewSubscriptionServiceClient(conn),
+	}, nil
 }
 
 func (sa SubscriptionAdapter) CreateFreeTrialSubscription(ctx context.Context, customerUUID uuid.UUID) (subscriptionUUID uuid.UUID, err error) {
-	return uuid.Nil, nil
+	resp, err := sa.client.CreateFreeTrialSubscription(ctx, &subscription.CreateFreeTrialSubscriptionRequest{
+		CustomerUuid: customerUUID.String(),
+	})
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return uuid.Parse(resp.SubscriptionUuid)
 }
+
 func (sa SubscriptionAdapter) DeleteSubscription(ctx context.Context, subscriptionUUID uuid.UUID) error {
-	return nil
+	_, err := sa.client.DeleteSubscription(ctx, &subscription.DeleteSubscriptionRequest{
+		SubscriptionUuid: subscriptionUUID.String(),
+	})
+	return err
 }

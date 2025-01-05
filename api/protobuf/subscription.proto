@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package subscription;
+
+option go_package = "/subscription";
+
+import "google/protobuf/empty.proto";
+
+service SubscriptionService {
+  rpc CreateFreeTrialSubscription(CreateFreeTrialSubscriptionRequest) returns (CreateFreeTrialSubscriptionResponse);
+  rpc DeleteSubscription(DeleteSubscriptionRequest) returns (google.protobuf.Empty);
+}
+
+message CreateFreeTrialSubscriptionRequest {
+  string customer_uuid = 1;
+}
+
+message CreateFreeTrialSubscriptionResponse {
+  string subscription_uuid = 1;
+}
+
+message DeleteSubscriptionRequest {
+  string subscription_uuid = 1;
+}

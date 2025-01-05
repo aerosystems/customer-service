@@ -45,9 +45,9 @@ func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID
 			cu.compensationCreateCustomerError(ctx, err, subscriptionUUID, projectUUID)
 		}
 	}()
-	//if subscriptionUUID, err = cu.subscriptionAdapter.CreateFreeTrialSubscription(ctx, customer.UUID); err != nil {
-	//	return err
-	//}
+	if subscriptionUUID, err = cu.subscriptionAdapter.CreateFreeTrialSubscription(ctx, customer.UUID); err != nil {
+		return err
+	}
 	if projectUUID, err = cu.projectAdapter.CreateDefaultProject(ctx, customer.UUID); err != nil {
 		return err
 	}

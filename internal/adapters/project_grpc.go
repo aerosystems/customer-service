@@ -40,5 +40,8 @@ func (pa ProjectAdapter) CreateDefaultProject(ctx context.Context, customerUUID 
 }
 
 func (pa ProjectAdapter) DeleteProject(ctx context.Context, projectUUID uuid.UUID) error {
-	return nil
+	_, err := pa.client.DeleteProject(ctx, &project.DeleteProjectRequest{
+		ProjectUuid: projectUUID.String(),
+	})
+	return err
 }

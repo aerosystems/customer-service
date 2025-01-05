@@ -16,7 +16,8 @@ type Config struct {
 	GcpProjectId                 string
 	GoogleApplicationCredentials string
 
-	ProjectServiceGRPCAddr string
+	ProjectServiceGRPCAddr      string
+	SubscriptionServiceGRPCAddr string
 }
 
 func NewConfig() *Config {
@@ -34,6 +35,7 @@ func NewConfig() *Config {
 		Port:                         webPort,
 		GcpProjectId:                 viper.GetString("GCP_PROJECT_ID"),
 		GoogleApplicationCredentials: viper.GetString("GOOGLE_APPLICATION_CREDENTIALS"),
-		ProjectServiceGRPCAddr:       viper.GetString("PROJECT_SERVICE_GRPC_ADDR"),
+		ProjectServiceGRPCAddr:       viper.GetString("PRJCT_SERVICE_GRPC_ADDR"),
+		SubscriptionServiceGRPCAddr:  viper.GetString("SBS_SERVICE_GRPC_ADDR"),
 	}
 }
