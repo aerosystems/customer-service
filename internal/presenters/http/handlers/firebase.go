@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
+	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -58,6 +60,9 @@ func (ch FirebaseHandler) CreateCustomer(c echo.Context) error {
 	}
 
 	err := ch.customerUsecase.CreateCustomer(c.Request().Context(), customerReq.Email, customerReq.UID)
+	if errors.Is(err, CustomErrors.ErrCustomerAlreadyExists) {
+		c.NoContent(http.StatusCreated)
+	}
 	if err != nil {
 		return err
 	}

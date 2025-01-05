@@ -3,13 +3,12 @@ package adapters
 import (
 	"context"
 	"github.com/google/uuid"
-	"google.golang.org/grpc"
 )
 
 type SubscriptionAdapter struct {
 }
 
-func NewSubscriptionAdapter(address string, opts ...grpc.DialOption) (*SubscriptionAdapter, error) {
+func NewSubscriptionAdapter(address string) (*SubscriptionAdapter, error) {
 	return &SubscriptionAdapter{}, nil
 }
 

@@ -18,7 +18,6 @@ import (
 	"github.com/aerosystems/customer-service/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 )
 
 // Injectors from wire.go:
@@ -73,7 +72,7 @@ func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.Custome
 // wire.go:
 
 func ProvideSubscriptionAdapter(cfg *config.Config) *adapters.SubscriptionAdapter {
-	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.ProjectServiceGRPCAddr, grpc.WithInsecure())
+	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.ProjectServiceGRPCAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +80,7 @@ func ProvideSubscriptionAdapter(cfg *config.Config) *adapters.SubscriptionAdapte
 }
 
 func ProvideProjectAdapter(cfg *config.Config) *adapters.ProjectAdapter {
-	projectAdapter, err := adapters.NewProjectAdapter(cfg.ProjectServiceGRPCAddr, grpc.WithInsecure())
+	projectAdapter, err := adapters.NewProjectAdapter(cfg.ProjectServiceGRPCAddr)
 	if err != nil {
 		panic(err)
 	}

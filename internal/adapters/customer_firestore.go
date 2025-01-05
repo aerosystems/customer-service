@@ -8,13 +8,13 @@ import (
 	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/domain"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"time"
 )
 
 const (
-	defaultTimeout          = 2 * time.Second
 	customersCollectionName = "customers"
 )
 
@@ -56,10 +56,8 @@ func CustomerToFirestore(customer *domain.Customer) *Customer {
 }
 
 func (fcr *FirestoreCustomerRepo) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.Customer, error) {
-	c, cancel := context.WithTimeout(ctx, defaultTimeout)
-	defer cancel()
 	docRef := fcr.client.Collection(customersCollectionName).Doc(uuid.String())
-	doc, err := docRef.Get(c)
+	doc, err := docRef.Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			return nil, CustomErrors.ErrCustomerNotFound
@@ -79,6 +77,35 @@ func (fcr *FirestoreCustomerRepo) GetByUUID(ctx context.Context, uuid uuid.UUID)
 	return customer.ToModel(), nil
 }
 
+func (fcr *FirestoreCustomerRepo) GetByFirebaseUID(_ context.Context, firebaseUID string) (*domain.Customer, error) {
+	query := fcr.client.Collection(customersCollectionName).Where("firebase_uid", "==", firebaseUID).Limit(1)
+
+	iter := query.Documents(context.Background())
+	defer iter.Stop()
+
+	for {
+		doc, err := iter.Next()
+		if err != nil {
+			if errors.Is(err, iterator.Done) {
+				break
+			}
+			return nil, err
+			break
+		}
+		customer := Customer{}
+		err = doc.DataTo(&customer)
+		if err != nil {
+			return nil, err
+			break
+		}
+		if customer.DeleteAt == nil {
+			return customer.ToModel(), nil
+			break
+		}
+	}
+	return nil, CustomErrors.ErrCustomerNotFound
+}
+
 func (fcr *FirestoreCustomerRepo) Create(ctx context.Context, customer *domain.Customer) error {
 	currentCustomer, err := fcr.GetByUUID(ctx, customer.UUID)
 	if err != nil && !errors.Is(err, CustomErrors.ErrCustomerNotFound) {
@@ -87,25 +114,17 @@ func (fcr *FirestoreCustomerRepo) Create(ctx context.Context, customer *domain.C
 	if currentCustomer != nil {
 		return CustomErrors.ErrCustomerAlreadyExists
 	}
-	c, cancel := context.WithTimeout(ctx, defaultTimeout)
-	defer cancel()
 
-	_, err = fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(c, CustomerToFirestore(customer))
+	_, err = fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(ctx, CustomerToFirestore(customer))
 	return err
 }
 
 func (fcr *FirestoreCustomerRepo) Update(ctx context.Context, customer *domain.Customer) error {
-	c, cancel := context.WithTimeout(ctx, defaultTimeout)
-	defer cancel()
-
-	_, err := fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(c, CustomerToFirestore(customer))
+	_, err := fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(ctx, CustomerToFirestore(customer))
 	return err
 }
 
 func (fcr *FirestoreCustomerRepo) Delete(ctx context.Context, uuid uuid.UUID) error {
-	c, cancel := context.WithTimeout(ctx, defaultTimeout)
-	defer cancel()
-
-	_, err := fcr.client.Collection(customersCollectionName).Doc(uuid.String()).Delete(c)
+	_, err := fcr.client.Collection(customersCollectionName).Doc(uuid.String()).Delete(ctx)
 	return err
 }

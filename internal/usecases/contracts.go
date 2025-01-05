@@ -8,6 +8,7 @@ import (
 
 type CustomerRepository interface {
 	GetByUUID(ctx context.Context, customerUUID uuid.UUID) (*domain.Customer, error)
+	GetByFirebaseUID(ctx context.Context, firebaseUID string) (*domain.Customer, error)
 	Create(ctx context.Context, customer *domain.Customer) error
 	Update(ctx context.Context, customer *domain.Customer) error
 	Delete(ctx context.Context, customerUUID uuid.UUID) error
