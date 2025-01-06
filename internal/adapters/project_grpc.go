@@ -20,7 +20,7 @@ func NewProjectAdapter(address string) (*ProjectAdapter, error) {
 			Timeout: 30,
 		}),
 	}
-	if address[len(address)-4:] != ":443" {
+	if address[len(address)-4:] == ":443" {
 		opts = append(opts, grpc.WithAuthority(address))
 	} else {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
