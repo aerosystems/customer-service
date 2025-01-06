@@ -58,15 +58,15 @@ func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID
 }
 
 func (cu CustomerUsecase) compensationCreateCustomerError(ctx context.Context, err error, subscriptionUUID, projectUUID uuid.UUID) {
-	cu.log.WithError(err).Error("Failed creating customer error: %v", err)
+	cu.log.WithError(err).Errorf("Failed creating customer error: %v", err)
 	if subscriptionUUID != uuid.Nil {
 		if compErr := cu.subscriptionAdapter.DeleteSubscription(ctx, subscriptionUUID); err != nil {
-			cu.log.WithError(compErr).Error("Failed compensation creating subscription error: %v", err)
+			cu.log.WithError(compErr).Errorf("Failed compensation creating subscription error: %v", err)
 		}
 	}
 	if projectUUID != uuid.Nil {
 		if compErr := cu.projectAdapter.DeleteProject(ctx, projectUUID); err != nil {
-			cu.log.WithError(compErr).Error("Failed compensation creating project error: %v", err)
+			cu.log.WithError(compErr).Errorf("Failed compensation creating project error: %v", err)
 		}
 	}
 }

@@ -45,7 +45,7 @@ func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.S
 }
 
 func ProvideSubscriptionAdapter(cfg *config.Config) *adapters.SubscriptionAdapter {
-	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.ProjectServiceGRPCAddr)
+	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.SubscriptionServiceGRPCAddr)
 	if err != nil {
 		panic(err)
 	}

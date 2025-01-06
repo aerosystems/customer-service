@@ -72,7 +72,7 @@ func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.Custome
 // wire.go:
 
 func ProvideSubscriptionAdapter(cfg *config.Config) *adapters.SubscriptionAdapter {
-	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.ProjectServiceGRPCAddr)
+	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.SubscriptionServiceGRPCAddr)
 	if err != nil {
 		panic(err)
 	}
