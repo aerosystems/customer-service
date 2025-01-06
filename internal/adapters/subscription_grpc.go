@@ -14,13 +14,18 @@ type SubscriptionAdapter struct {
 }
 
 func NewSubscriptionAdapter(address string) (*SubscriptionAdapter, error) {
-	conn, err := grpc.NewClient(address,
+	opts := []grpc.DialOption{
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
 			Time:    30,
 			Timeout: 30,
 		}),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
+	}
+	if address[len(address)-4:] != ":443" {
+		opts = append(opts, grpc.WithAuthority(address))
+	} else {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+	conn, err := grpc.NewClient(address, opts...)
 	if err != nil {
 		return nil, err
 	}
