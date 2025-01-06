@@ -36,9 +36,9 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /app/secret/verifire-60d1b-3a7b22c9842d
             - name: PRJCT_SERVICE_GRPC_ADDR
-              value: https://project-service-grpc-244108678816.europe-west1.run.app:50051
+              value: project-service-grpc-244108678816.europe-west1.run.app:50051
             - name: SBS_SERVICE_GRPC_ADDR
-              value: https://subscription-service-grpc-244108678816.europe-west1.run.app:50051
+              value: subscription-service-grpc-244108678816.europe-west1.run.app:50051
           resources:
             limits:
               cpu: 1000m
