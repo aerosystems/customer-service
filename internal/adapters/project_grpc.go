@@ -2,9 +2,11 @@ package adapters
 
 import (
 	"context"
+	"crypto/tls"
 	"github.com/aerosystems/customer-service/internal/common/protobuf/project"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 )
@@ -21,7 +23,7 @@ func NewProjectAdapter(address string) (*ProjectAdapter, error) {
 		}),
 	}
 	if address[len(address)-4:] == ":443" {
-		opts = append(opts, grpc.WithAuthority(address))
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	} else {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
