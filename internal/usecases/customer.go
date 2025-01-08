@@ -14,6 +14,7 @@ type CustomerUsecase struct {
 	customerRepo        CustomerRepository
 	subscriptionAdapter SubscriptionAdapter
 	projectAdapter      ProjectAdapter
+	fireAuthAdapter     FirebaseAuthAdapter
 }
 
 func NewCustomerUsecase(
@@ -21,12 +22,14 @@ func NewCustomerUsecase(
 	customerRepo CustomerRepository,
 	subscriptionAdapter SubscriptionAdapter,
 	projectAdapter ProjectAdapter,
+	fireAuthAdapter FirebaseAuthAdapter,
 ) *CustomerUsecase {
 	return &CustomerUsecase{
 		log:                 log,
 		customerRepo:        customerRepo,
 		subscriptionAdapter: subscriptionAdapter,
 		projectAdapter:      projectAdapter,
+		fireAuthAdapter:     fireAuthAdapter,
 	}
 }
 
@@ -42,7 +45,7 @@ func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID
 	var subscriptionUUID, projectUUID uuid.UUID
 	defer func() {
 		if err != nil {
-			cu.compensationCreateCustomerError(ctx, err, subscriptionUUID, projectUUID)
+			cu.compensationCreateCustomerError(ctx, err, customer.UUID, subscriptionUUID, projectUUID)
 		}
 	}()
 	if subscriptionUUID, err = cu.subscriptionAdapter.CreateFreeTrialSubscription(ctx, customer.UUID); err != nil {
@@ -54,19 +57,27 @@ func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID
 	if err = cu.customerRepo.Create(ctx, customer); err != nil {
 		return err
 	}
+	if err = cu.fireAuthAdapter.SetClaimCustomerUUID(ctx, firebaseUID, customer.UUID); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (cu CustomerUsecase) compensationCreateCustomerError(ctx context.Context, err error, subscriptionUUID, projectUUID uuid.UUID) {
+func (cu CustomerUsecase) compensationCreateCustomerError(ctx context.Context, err error, customerUUID, subscriptionUUID, projectUUID uuid.UUID) {
 	cu.log.WithError(err).Errorf("Failed creating customer error: %v", err)
 	if subscriptionUUID != uuid.Nil {
-		if compErr := cu.subscriptionAdapter.DeleteSubscription(ctx, subscriptionUUID); err != nil {
+		if compErr := cu.subscriptionAdapter.DeleteSubscription(ctx, subscriptionUUID); compErr != nil {
 			cu.log.WithError(compErr).Errorf("Failed compensation creating subscription error: %v", err)
 		}
 	}
 	if projectUUID != uuid.Nil {
-		if compErr := cu.projectAdapter.DeleteProject(ctx, projectUUID); err != nil {
+		if compErr := cu.projectAdapter.DeleteProject(ctx, projectUUID); compErr != nil {
 			cu.log.WithError(compErr).Errorf("Failed compensation creating project error: %v", err)
+		}
+	}
+	if subscriptionUUID != uuid.Nil && projectUUID != uuid.Nil {
+		if compErr := cu.customerRepo.Delete(ctx, customerUUID); compErr != nil {
+			cu.log.WithError(compErr).Errorf("Failed compensation creating customer error: %v", err)
 		}
 	}
 }

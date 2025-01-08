@@ -9,12 +9,14 @@ package main
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"firebase.google.com/go/auth"
 	"github.com/aerosystems/customer-service/internal/adapters"
 	"github.com/aerosystems/customer-service/internal/common/config"
 	"github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
+	"github.com/aerosystems/customer-service/pkg/gcp"
 	"github.com/aerosystems/customer-service/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -32,7 +34,9 @@ func InitApp() *App {
 	firestoreCustomerRepo := ProvideFirestoreCustomerRepo(client)
 	subscriptionAdapter := ProvideSubscriptionAdapter(config)
 	projectAdapter := ProvideProjectAdapter(config)
-	customerUsecase := ProvideCustomerUsecase(logrusLogger, firestoreCustomerRepo, subscriptionAdapter, projectAdapter)
+	authClient := ProvideFirebaseClient(config)
+	firebaseAuthAdapter := ProvideFirebaseAuthAdapter(authClient)
+	customerUsecase := ProvideCustomerUsecase(logrusLogger, firestoreCustomerRepo, subscriptionAdapter, projectAdapter, firebaseAuthAdapter)
 	firebaseHandler := ProvideCustomerHandler(logrusLogger, customerUsecase)
 	server := ProvideHttpServer(config, logrusLogger, httpErrorHandler, firebaseHandler)
 	app := ProvideApp(logrusLogger, config, server)
@@ -54,9 +58,14 @@ func ProvideConfig() *config.Config {
 	return configConfig
 }
 
-func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter) *usecases.CustomerUsecase {
-	customerUsecase := usecases.NewCustomerUsecase(log, customerRepo, subscriptionAdapter, projectAdapter)
+func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter, firebaseAuthAdapter usecases.FirebaseAuthAdapter) *usecases.CustomerUsecase {
+	customerUsecase := usecases.NewCustomerUsecase(log, customerRepo, subscriptionAdapter, projectAdapter, firebaseAuthAdapter)
 	return customerUsecase
+}
+
+func ProvideFirebaseAuthAdapter(client *auth.Client) *adapters.FirebaseAuthAdapter {
+	firebaseAuthAdapter := adapters.NewFirebaseAuthAdapter(client)
+	return firebaseAuthAdapter
 }
 
 func ProvideFirestoreCustomerRepo(client *firestore.Client) *adapters.FirestoreCustomerRepo {
@@ -89,6 +98,14 @@ func ProvideProjectAdapter(cfg *config.Config) *adapters.ProjectAdapter {
 
 func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
 	return log.Logger
+}
+
+func ProvideFirebaseClient(cfg *config.Config) *auth.Client {
+	client, err := gcp.NewFirebaseClient(cfg.GcpProjectId, cfg.GoogleApplicationCredentials)
+	if err != nil {
+		panic(err)
+	}
+	return client
 }
 
 func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {

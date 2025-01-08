@@ -55,8 +55,8 @@ func CustomerToFirestore(customer *domain.Customer) *Customer {
 	}
 }
 
-func (fcr *FirestoreCustomerRepo) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.Customer, error) {
-	docRef := fcr.client.Collection(customersCollectionName).Doc(uuid.String())
+func (fcr *FirestoreCustomerRepo) GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*domain.Customer, error) {
+	docRef := fcr.client.Collection(customersCollectionName).Doc(customerUUID.String())
 	doc, err := docRef.Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
@@ -107,7 +107,7 @@ func (fcr *FirestoreCustomerRepo) GetByFirebaseUID(_ context.Context, firebaseUI
 }
 
 func (fcr *FirestoreCustomerRepo) Create(ctx context.Context, customer *domain.Customer) error {
-	currentCustomer, err := fcr.GetByUUID(ctx, customer.UUID)
+	currentCustomer, err := fcr.GetByCustomerUUID(ctx, customer.UUID)
 	if err != nil && !errors.Is(err, CustomErrors.ErrCustomerNotFound) {
 		return err
 	}
@@ -124,7 +124,7 @@ func (fcr *FirestoreCustomerRepo) Update(ctx context.Context, customer *domain.C
 	return err
 }
 
-func (fcr *FirestoreCustomerRepo) Delete(ctx context.Context, uuid uuid.UUID) error {
-	_, err := fcr.client.Collection(customersCollectionName).Doc(uuid.String()).Delete(ctx)
+func (fcr *FirestoreCustomerRepo) Delete(ctx context.Context, customerUUID uuid.UUID) error {
+	_, err := fcr.client.Collection(customersCollectionName).Doc(customerUUID.String()).Delete(ctx)
 	return err
 }

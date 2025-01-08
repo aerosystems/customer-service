@@ -7,7 +7,7 @@ import (
 )
 
 type CustomerRepository interface {
-	GetByUUID(ctx context.Context, customerUUID uuid.UUID) (*domain.Customer, error)
+	GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*domain.Customer, error)
 	GetByFirebaseUID(ctx context.Context, firebaseUID string) (*domain.Customer, error)
 	Create(ctx context.Context, customer *domain.Customer) error
 	Update(ctx context.Context, customer *domain.Customer) error
@@ -22,4 +22,8 @@ type SubscriptionAdapter interface {
 type ProjectAdapter interface {
 	CreateDefaultProject(ctx context.Context, customerUUID uuid.UUID) (projectUUID uuid.UUID, err error)
 	DeleteProject(ctx context.Context, projectUUID uuid.UUID) error
+}
+
+type FirebaseAuthAdapter interface {
+	SetClaimCustomerUUID(ctx context.Context, uid string, customerUUID uuid.UUID) error
 }
