@@ -14,7 +14,6 @@ import (
 	"github.com/aerosystems/customer-service/internal/common/config"
 	"github.com/aerosystems/customer-service/internal/common/custom_errors"
 	"github.com/aerosystems/customer-service/internal/presenters/http"
-	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/gcp"
 	"github.com/aerosystems/customer-service/pkg/logger"
@@ -43,7 +42,7 @@ func InitApp() *App {
 	return app
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server) *App {
+func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HTTPServer.Server) *App {
 	app := NewApp(log, cfg, httpServer)
 	return app
 }
@@ -73,8 +72,8 @@ func ProvideFirestoreCustomerRepo(client *firestore.Client) *adapters.FirestoreC
 	return firestoreCustomerRepo
 }
 
-func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.FirebaseHandler {
-	firebaseHandler := handlers.NewFirebaseHandler(customerUsecase)
+func ProvideCustomerHandler(log *logrus.Logger, customerUsecase HTTPServer.CustomerUsecase) *HTTPServer.FirebaseHandler {
+	firebaseHandler := HTTPServer.NewFirebaseHandler(customerUsecase)
 	return firebaseHandler
 }
 
@@ -117,8 +116,8 @@ func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
 	return client
 }
 
-func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.FirebaseHandler) *HttpServer.Server {
-	return HttpServer.NewServer(cfg.Port, log, customErrorHandler, customerHandler)
+func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *HTTPServer.FirebaseHandler) *HTTPServer.Server {
+	return HTTPServer.NewServer(cfg.Port, log, customErrorHandler, customerHandler)
 }
 
 func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {

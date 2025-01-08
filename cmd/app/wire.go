@@ -10,8 +10,7 @@ import (
 	"github.com/aerosystems/customer-service/internal/adapters"
 	"github.com/aerosystems/customer-service/internal/common/config"
 	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
-	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
-	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
+	HTTPServer "github.com/aerosystems/customer-service/internal/presenters/http"
 	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/aerosystems/customer-service/pkg/gcp"
 	"github.com/aerosystems/customer-service/pkg/logger"
@@ -23,7 +22,7 @@ import (
 //go:generate wire
 func InitApp() *App {
 	panic(wire.Build(
-		wire.Bind(new(handlers.CustomerUsecase), new(*usecases.CustomerUsecase)),
+		wire.Bind(new(HTTPServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*adapters.FirestoreCustomerRepo)),
 		wire.Bind(new(usecases.SubscriptionAdapter), new(*adapters.SubscriptionAdapter)),
 		wire.Bind(new(usecases.ProjectAdapter), new(*adapters.ProjectAdapter)),
@@ -45,7 +44,7 @@ func InitApp() *App {
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server) *App {
+func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HTTPServer.Server) *App {
 	panic(wire.Build(NewApp))
 }
 
@@ -106,12 +105,12 @@ func ProvideFirestoreCustomerRepo(client *firestore.Client) *adapters.FirestoreC
 	panic(wire.Build(adapters.NewFirestoreCustomerRepo))
 }
 
-func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.FirebaseHandler) *HttpServer.Server {
-	return HttpServer.NewServer(cfg.Port, log, customErrorHandler, customerHandler)
+func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *HTTPServer.FirebaseHandler) *HTTPServer.Server {
+	return HTTPServer.NewServer(cfg.Port, log, customErrorHandler, customerHandler)
 }
 
-func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.FirebaseHandler {
-	panic(wire.Build(handlers.NewFirebaseHandler))
+func ProvideCustomerHandler(log *logrus.Logger, customerUsecase HTTPServer.CustomerUsecase) *HTTPServer.FirebaseHandler {
+	panic(wire.Build(HTTPServer.NewFirebaseHandler))
 }
 
 func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {

@@ -1,8 +1,7 @@
-package HttpServer
+package HTTPServer
 
 import (
 	"fmt"
-	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -11,14 +10,14 @@ type Server struct {
 	port            int
 	log             *logrus.Logger
 	echo            *echo.Echo
-	firebaseHandler *handlers.FirebaseHandler
+	firebaseHandler *FirebaseHandler
 }
 
 func NewServer(
 	port int,
 	log *logrus.Logger,
 	errorHandler *echo.HTTPErrorHandler,
-	customerHandler *handlers.FirebaseHandler,
+	customerHandler *FirebaseHandler,
 
 ) *Server {
 	server := &Server{

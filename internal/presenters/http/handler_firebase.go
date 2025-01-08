@@ -1,4 +1,4 @@
-package handlers
+package HTTPServer
 
 import (
 	"encoding/json"
@@ -18,6 +18,10 @@ func NewFirebaseHandler(
 	return &FirebaseHandler{
 		customerUsecase: customerUsecase,
 	}
+}
+
+type ErrorResponse struct {
+	Message string `json:"message"`
 }
 
 type CreateFirebaseCustomerRequest struct {
