@@ -57,7 +57,7 @@ func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID
 	if err = cu.customerRepo.Create(ctx, customer); err != nil {
 		return err
 	}
-	if err = cu.fireAuthAdapter.SetClaimCustomerUUID(ctx, firebaseUID, customer.UUID); err != nil {
+	if err = cu.fireAuthAdapter.SetCustomUserClaims(ctx, firebaseUID, customer.UUID); err != nil {
 		return err
 	}
 	return nil

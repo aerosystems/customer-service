@@ -25,5 +25,5 @@ type ProjectAdapter interface {
 }
 
 type FirebaseAuthAdapter interface {
-	SetClaimCustomerUUID(ctx context.Context, uid string, customerUUID uuid.UUID) error
+	SetCustomUserClaims(ctx context.Context, uid string, customerUUID uuid.UUID) error
 }

@@ -16,7 +16,10 @@ func NewFirebaseAuthAdapter(client *auth.Client) *FirebaseAuthAdapter {
 	}
 }
 
-func (f *FirebaseAuthAdapter) SetClaimCustomerUUID(ctx context.Context, uid string, customerUUID uuid.UUID) error {
-	claims := map[string]interface{}{"customer_uuid": customerUUID.String()}
+func (f *FirebaseAuthAdapter) SetCustomUserClaims(ctx context.Context, uid string, customerUUID uuid.UUID) error {
+	claims := map[string]interface{}{
+		"user_uuid": customerUUID.String(),
+		"role":      "customer",
+	}
 	return f.Client.SetCustomUserClaims(ctx, uid, claims)
 }
