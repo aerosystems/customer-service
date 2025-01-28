@@ -17,8 +17,8 @@ steps:
       - "APP_NAME=${_APP_NAME}"
       - "IMAGE=${_IMAGE}"
     script: |
-      sed -i s@%APP_NAME%@${APP_NAME}@g service.yaml
-      sed -i s@%IMAGE%@${IMAGE}@g service.yaml
+      sed -i s@%APP_NAME%@${APP_NAME}@g service-http.yaml
+      sed -i s@%IMAGE%@${IMAGE}@g service-http.yaml
     id: REPLACE_YAML_VALUE
     waitFor: [ "-" ]
 
@@ -29,7 +29,7 @@ steps:
         "run",
         "services",
         "replace",
-        "service.yaml",
+        "service-http.yaml",
         "--region",
         "${_REGION}",
       ]
@@ -40,7 +40,7 @@ steps:
 
 # Deploy to Cloud Run
 substitutions:
-  _APP_NAME: ${REPO_NAME}
+  _APP_NAME: ${REPO_NAME}-http
   _REGION: ${LOCATION}
   _IMAGE: ${LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/customer-service:${SHORT_SHA}
 

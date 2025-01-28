@@ -3,7 +3,7 @@ package adapters
 import (
 	"context"
 	"crypto/tls"
-	"github.com/aerosystems/customer-service/internal/common/protobuf/subscription"
+	"github.com/aerosystems/common-service/gen/protobuf/subscription"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
