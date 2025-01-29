@@ -39,7 +39,7 @@ func InitApp() *App {
 		ProvideEchoErrorHandler,
 		ProvideSubscriptionAdapter,
 		ProvideProjectAdapter,
-		ProvideFirebaseClient,
+		ProvideFirebaseAuthClient,
 		ProvideFirebaseAuthAdapter,
 	))
 }
@@ -84,7 +84,7 @@ func ProvideFirebaseAuthAdapter(client *auth.Client) *adapters.FirebaseAuthAdapt
 	panic(wire.Build(adapters.NewFirebaseAuthAdapter))
 }
 
-func ProvideFirebaseClient(cfg *config.Config) *auth.Client {
+func ProvideFirebaseAuthClient(cfg *config.Config) *auth.Client {
 	client, err := gcp.NewFirebaseClient(cfg.GcpProjectId, cfg.GoogleApplicationCredentials)
 	if err != nil {
 		panic(err)
