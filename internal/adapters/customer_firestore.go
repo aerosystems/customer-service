@@ -5,8 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
-	"github.com/aerosystems/customer-service/internal/domain"
+	"github.com/aerosystems/customer-service/internal/entities"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
@@ -36,8 +35,8 @@ type Customer struct {
 	DeleteAt    *time.Time `firestore:"delete_at,omitempty"`
 }
 
-func (c *Customer) ToModel() *domain.Customer {
-	return &domain.Customer{
+func (c *Customer) ToModel() *entities.Customer {
+	return &entities.Customer{
 		UUID:        uuid.MustParse(c.UUID),
 		Email:       c.Email,
 		FirebaseUID: c.FirebaseUID,
@@ -45,7 +44,7 @@ func (c *Customer) ToModel() *domain.Customer {
 	}
 }
 
-func CustomerToFirestore(customer *domain.Customer) *Customer {
+func CustomerToFirestore(customer *entities.Customer) *Customer {
 	return &Customer{
 		UUID:        customer.UUID.String(),
 		Email:       customer.Email,
@@ -55,12 +54,12 @@ func CustomerToFirestore(customer *domain.Customer) *Customer {
 	}
 }
 
-func (fcr *FirestoreCustomerRepo) GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*domain.Customer, error) {
+func (fcr *FirestoreCustomerRepo) GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*entities.Customer, error) {
 	docRef := fcr.client.Collection(customersCollectionName).Doc(customerUUID.String())
 	doc, err := docRef.Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			return nil, CustomErrors.ErrCustomerNotFound
+			return nil, entities.ErrCustomerNotFound
 		}
 		return nil, fmt.Errorf("could not get customer from Firestore repository: %w", err)
 	}
@@ -71,13 +70,13 @@ func (fcr *FirestoreCustomerRepo) GetByCustomerUUID(ctx context.Context, custome
 	}
 
 	if customer.DeleteAt != nil {
-		return nil, CustomErrors.ErrCustomerNotFound
+		return nil, entities.ErrCustomerNotFound
 	}
 
 	return customer.ToModel(), nil
 }
 
-func (fcr *FirestoreCustomerRepo) GetByFirebaseUID(_ context.Context, firebaseUID string) (*domain.Customer, error) {
+func (fcr *FirestoreCustomerRepo) GetByFirebaseUID(_ context.Context, firebaseUID string) (*entities.Customer, error) {
 	query := fcr.client.Collection(customersCollectionName).Where("firebase_uid", "==", firebaseUID).Limit(1)
 
 	iter := query.Documents(context.Background())
@@ -103,23 +102,23 @@ func (fcr *FirestoreCustomerRepo) GetByFirebaseUID(_ context.Context, firebaseUI
 			break
 		}
 	}
-	return nil, CustomErrors.ErrCustomerNotFound
+	return nil, entities.ErrCustomerNotFound
 }
 
-func (fcr *FirestoreCustomerRepo) Create(ctx context.Context, customer *domain.Customer) error {
+func (fcr *FirestoreCustomerRepo) Create(ctx context.Context, customer *entities.Customer) error {
 	currentCustomer, err := fcr.GetByCustomerUUID(ctx, customer.UUID)
-	if err != nil && !errors.Is(err, CustomErrors.ErrCustomerNotFound) {
+	if err != nil && !errors.Is(err, entities.ErrCustomerNotFound) {
 		return err
 	}
 	if currentCustomer != nil {
-		return CustomErrors.ErrCustomerAlreadyExists
+		return entities.ErrCustomerAlreadyExists
 	}
 
 	_, err = fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(ctx, CustomerToFirestore(customer))
 	return err
 }
 
-func (fcr *FirestoreCustomerRepo) Update(ctx context.Context, customer *domain.Customer) error {
+func (fcr *FirestoreCustomerRepo) Update(ctx context.Context, customer *entities.Customer) error {
 	_, err := fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(ctx, CustomerToFirestore(customer))
 	return err
 }

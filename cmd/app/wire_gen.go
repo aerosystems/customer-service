@@ -10,14 +10,12 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"firebase.google.com/go/v4/auth"
-	"github.com/aerosystems/common-service/pkg/gcp"
-	"github.com/aerosystems/common-service/pkg/logger"
+	"github.com/aerosystems/common-service/logger"
+	"github.com/aerosystems/common-service/pkg/gcpclient"
+	"github.com/aerosystems/common-service/presenters/httpserver"
 	"github.com/aerosystems/customer-service/internal/adapters"
-	"github.com/aerosystems/customer-service/internal/common/config"
-	"github.com/aerosystems/customer-service/internal/common/custom_errors"
-	"github.com/aerosystems/customer-service/internal/presenters/http"
+	"github.com/aerosystems/customer-service/internal/ports/http"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,21 +26,20 @@ func InitApp() *App {
 	logger := ProvideLogger()
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
-	httpErrorHandler := ProvideEchoErrorHandler(config)
 	client := ProvideFirestoreClient(config)
 	firestoreCustomerRepo := ProvideFirestoreCustomerRepo(client)
 	subscriptionAdapter := ProvideSubscriptionAdapter(config)
 	projectAdapter := ProvideProjectAdapter(config)
-	authClient := ProvideFirebaseClient(config)
+	authClient := ProvideFirebaseAuthClient(config)
 	firebaseAuthAdapter := ProvideFirebaseAuthAdapter(authClient)
 	customerUsecase := ProvideCustomerUsecase(logrusLogger, firestoreCustomerRepo, subscriptionAdapter, projectAdapter, firebaseAuthAdapter)
-	firebaseHandler := ProvideCustomerHandler(logrusLogger, customerUsecase)
-	server := ProvideHttpServer(config, logrusLogger, httpErrorHandler, firebaseHandler)
+	handler := ProvideHandler(logrusLogger, customerUsecase)
+	server := ProvideHTTPServer(config, logrusLogger, handler)
 	app := ProvideApp(logrusLogger, config, server)
 	return app
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HTTPServer.Server) *App {
+func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *App {
 	app := NewApp(log, cfg, httpServer)
 	return app
 }
@@ -52,9 +49,9 @@ func ProvideLogger() *logger.Logger {
 	return loggerLogger
 }
 
-func ProvideConfig() *config.Config {
-	configConfig := config.NewConfig()
-	return configConfig
+func ProvideConfig() *Config {
+	config := NewConfig()
+	return config
 }
 
 func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter, firebaseAuthAdapter usecases.FirebaseAuthAdapter) *usecases.CustomerUsecase {
@@ -72,14 +69,14 @@ func ProvideFirestoreCustomerRepo(client *firestore.Client) *adapters.FirestoreC
 	return firestoreCustomerRepo
 }
 
-func ProvideCustomerHandler(log *logrus.Logger, customerUsecase HTTPServer.CustomerUsecase) *HTTPServer.FirebaseHandler {
-	firebaseHandler := HTTPServer.NewFirebaseHandler(customerUsecase)
-	return firebaseHandler
+func ProvideHandler(log *logrus.Logger, customerUsecase HTTPServer.CustomerUsecase) *HTTPServer.Handler {
+	handler := HTTPServer.NewHandler(customerUsecase)
+	return handler
 }
 
 // wire.go:
 
-func ProvideSubscriptionAdapter(cfg *config.Config) *adapters.SubscriptionAdapter {
+func ProvideSubscriptionAdapter(cfg *Config) *adapters.SubscriptionAdapter {
 	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.SubscriptionServiceGRPCAddr)
 	if err != nil {
 		panic(err)
@@ -87,7 +84,7 @@ func ProvideSubscriptionAdapter(cfg *config.Config) *adapters.SubscriptionAdapte
 	return subscriptionAdapter
 }
 
-func ProvideProjectAdapter(cfg *config.Config) *adapters.ProjectAdapter {
+func ProvideProjectAdapter(cfg *Config) *adapters.ProjectAdapter {
 	projectAdapter, err := adapters.NewProjectAdapter(cfg.ProjectServiceGRPCAddr)
 	if err != nil {
 		panic(err)
@@ -99,15 +96,15 @@ func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
 	return log.Logger
 }
 
-func ProvideFirebaseClient(cfg *config.Config) *auth.Client {
-	client, err := gcp.NewFirebaseClient(cfg.GcpProjectId, cfg.GoogleApplicationCredentials)
+func ProvideFirebaseAuthClient(cfg *Config) *auth.Client {
+	client, err := gcpclient.NewFirebaseClient(cfg.GcpProjectId, cfg.GoogleApplicationCredentials)
 	if err != nil {
 		panic(err)
 	}
 	return client
 }
 
-func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
+func ProvideFirestoreClient(cfg *Config) *firestore.Client {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, cfg.GcpProjectId)
 	if err != nil {
@@ -116,11 +113,12 @@ func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
 	return client
 }
 
-func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *HTTPServer.FirebaseHandler) *HTTPServer.Server {
-	return HTTPServer.NewServer(cfg.Port, log, customErrorHandler, customerHandler)
-}
-
-func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {
-	customErrorHandler := CustomErrors.NewEchoErrorHandler(cfg.Mode)
-	return &customErrorHandler
+func ProvideHTTPServer(cfg *Config, log *logrus.Logger, handler *HTTPServer.Handler) *HTTPServer.Server {
+	return HTTPServer.NewHTTPServer(&HTTPServer.Config{
+		Config: httpserver.Config{
+			Host: cfg.Host,
+			Port: cfg.Port,
+		},
+		Mode: cfg.Mode,
+	}, log, handler)
 }

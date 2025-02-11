@@ -2,15 +2,15 @@ package usecases
 
 import (
 	"context"
-	"github.com/aerosystems/customer-service/internal/domain"
+	"github.com/aerosystems/customer-service/internal/entities"
 	"github.com/google/uuid"
 )
 
 type CustomerRepository interface {
-	GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*domain.Customer, error)
-	GetByFirebaseUID(ctx context.Context, firebaseUID string) (*domain.Customer, error)
-	Create(ctx context.Context, customer *domain.Customer) error
-	Update(ctx context.Context, customer *domain.Customer) error
+	GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*entities.Customer, error)
+	GetByFirebaseUID(ctx context.Context, firebaseUID string) (*entities.Customer, error)
+	Create(ctx context.Context, customer *entities.Customer) error
+	Update(ctx context.Context, customer *entities.Customer) error
 	Delete(ctx context.Context, customerUUID uuid.UUID) error
 }
 

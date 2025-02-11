@@ -3,8 +3,7 @@ package usecases
 import (
 	"context"
 	"errors"
-	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
-	"github.com/aerosystems/customer-service/internal/domain"
+	"github.com/aerosystems/customer-service/internal/entities"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
@@ -35,13 +34,13 @@ func NewCustomerUsecase(
 
 func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID string) error {
 	customer, err := cu.customerRepo.GetByFirebaseUID(ctx, firebaseUID)
-	if err != nil && !errors.Is(err, CustomErrors.ErrCustomerNotFound) {
+	if err != nil && !errors.Is(err, entities.ErrCustomerNotFound) {
 		return err
 	}
 	if customer != nil {
-		return CustomErrors.ErrCustomerAlreadyExists
+		return entities.ErrCustomerAlreadyExists
 	}
-	customer = domain.NewCustomer(email, firebaseUID)
+	customer = entities.NewCustomer(email, firebaseUID)
 	var subscriptionUUID, projectUUID uuid.UUID
 	defer func() {
 		if err != nil {

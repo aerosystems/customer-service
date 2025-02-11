@@ -3,26 +3,10 @@ package HTTPServer
 import (
 	"encoding/json"
 	"errors"
-	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
+	"github.com/aerosystems/customer-service/internal/entities"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
-
-type FirebaseHandler struct {
-	customerUsecase CustomerUsecase
-}
-
-func NewFirebaseHandler(
-	customerUsecase CustomerUsecase,
-) *FirebaseHandler {
-	return &FirebaseHandler{
-		customerUsecase: customerUsecase,
-	}
-}
-
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
 
 type CreateFirebaseCustomerRequest struct {
 	CreateFirebaseCustomerRequestBody
@@ -52,7 +36,7 @@ type CreateCustomerFirebaseEvent struct {
 // @Failure 422 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /v1/firebase/create-customer [post]
-func (ch FirebaseHandler) CreateCustomer(c echo.Context) error {
+func (h Handler) CreateCustomer(c echo.Context) error {
 	var req CreateFirebaseCustomerRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not bind request")
@@ -63,8 +47,8 @@ func (ch FirebaseHandler) CreateCustomer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, "could not unmarshal request")
 	}
 
-	err := ch.customerUsecase.CreateCustomer(c.Request().Context(), customerReq.Email, customerReq.UID)
-	if errors.Is(err, CustomErrors.ErrCustomerAlreadyExists) {
+	err := h.customerUsecase.CreateCustomer(c.Request().Context(), customerReq.Email, customerReq.UID)
+	if errors.Is(err, entities.ErrCustomerAlreadyExists) {
 		c.NoContent(http.StatusCreated)
 	}
 	if err != nil {
