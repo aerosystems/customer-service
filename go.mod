@@ -5,7 +5,7 @@ go 1.23.2
 require (
 	cloud.google.com/go/firestore v1.15.0
 	firebase.google.com/go/v4 v4.15.1
-	github.com/aerosystems/common-service v0.0.12
+	github.com/aerosystems/common-service v0.0.13
 	github.com/go-logrusutil/logrusutil v1.1.1
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
@@ -15,6 +15,7 @@ require (
 	golang.org/x/sync v0.10.0
 	google.golang.org/api v0.171.0
 	google.golang.org/grpc v1.70.0
+	google.golang.org/protobuf v1.36.4
 )
 
 require (
@@ -78,7 +79,6 @@ require (
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241202173237-19429a94021a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241202173237-19429a94021a // indirect
-	google.golang.org/protobuf v1.36.4 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
