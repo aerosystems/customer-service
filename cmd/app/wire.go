@@ -6,66 +6,92 @@ package main
 import (
 	"cloud.google.com/go/firestore"
 	"context"
-	CustomErrors "github.com/aerosystems/customer-service/internal/common/custom_errors"
-	"github.com/aerosystems/customer-service/internal/config"
-	"github.com/aerosystems/customer-service/internal/infrastructure/adapters/broker"
-	"github.com/aerosystems/customer-service/internal/infrastructure/repository/fire"
-	HttpServer "github.com/aerosystems/customer-service/internal/presenters/http"
-	"github.com/aerosystems/customer-service/internal/presenters/http/handlers"
+	"firebase.google.com/go/v4/auth"
+	"github.com/aerosystems/common-service/clients/gcpclient"
+	"github.com/aerosystems/common-service/logger"
+	"github.com/aerosystems/common-service/presenters/httpserver"
+	"github.com/aerosystems/customer-service/internal/adapters"
+	HTTPServer "github.com/aerosystems/customer-service/internal/ports/http"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"github.com/aerosystems/customer-service/pkg/logger"
-	PubSub "github.com/aerosystems/customer-service/pkg/pubsub"
 	"github.com/google/wire"
-	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
 //go:generate wire
 func InitApp() *App {
 	panic(wire.Build(
-		wire.Bind(new(handlers.CustomerUsecase), new(*usecases.CustomerUsecase)),
-		wire.Bind(new(usecases.CustomerRepository), new(*fire.CustomerRepo)),
-		wire.Bind(new(usecases.SubscriptionEventsAdapter), new(*broker.SubscriptionEventsAdapter)),
+		wire.Bind(new(HTTPServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
+		wire.Bind(new(usecases.CustomerRepository), new(*adapters.FirestoreCustomerRepo)),
+		wire.Bind(new(usecases.SubscriptionAdapter), new(*adapters.SubscriptionAdapter)),
+		wire.Bind(new(usecases.ProjectAdapter), new(*adapters.ProjectAdapter)),
+		wire.Bind(new(usecases.FirebaseAuthAdapter), new(*adapters.FirebaseAuthAdapter)),
+		wire.Bind(new(usecases.CheckmailAdapter), new(*adapters.CheckmailAdapter)),
 		ProvideApp,
 		ProvideLogger,
 		ProvideConfig,
 		ProvideLogrusLogger,
 		ProvideFirestoreClient,
 		ProvideCustomerUsecase,
-		ProvideFireCustomerRepo,
-		ProvideHttpServer,
-		ProvideCustomerHandler,
-		ProvidePubSubClient,
-		ProvideSubscriptionEventsAdapter,
-		ProvideEchoErrorHandler,
+		ProvideFirestoreCustomerRepo,
+		ProvideHTTPServer,
+		ProvideHandler,
+		ProvideSubscriptionAdapter,
+		ProvideProjectAdapter,
+		ProvideFirebaseAuthClient,
+		ProvideFirebaseAuthAdapter,
+		ProvideCheckmailAdapter,
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *config.Config, httpServer *HttpServer.Server) *App {
+func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *App {
 	panic(wire.Build(NewApp))
+}
+
+func ProvideSubscriptionAdapter(cfg *Config) *adapters.SubscriptionAdapter {
+	subscriptionAdapter, err := adapters.NewSubscriptionAdapter(cfg.SubscriptionServiceGRPCAddr)
+	if err != nil {
+		panic(err)
+	}
+	return subscriptionAdapter
+}
+
+func ProvideProjectAdapter(cfg *Config) *adapters.ProjectAdapter {
+	projectAdapter, err := adapters.NewProjectAdapter(cfg.ProjectServiceGRPCAddr)
+	if err != nil {
+		panic(err)
+	}
+	return projectAdapter
 }
 
 func ProvideLogger() *logger.Logger {
 	panic(wire.Build(logger.NewLogger))
 }
 
-func ProvideConfig() *config.Config {
-	panic(wire.Build(config.NewConfig))
+func ProvideConfig() *Config {
+	panic(wire.Build(NewConfig))
 }
 
 func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
 	return log.Logger
 }
 
-func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionEventsAdapter usecases.SubscriptionEventsAdapter) *usecases.CustomerUsecase {
+func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter, checkmailAdapter usecases.CheckmailAdapter, firebaseAuthAdapter usecases.FirebaseAuthAdapter) *usecases.CustomerUsecase {
 	panic(wire.Build(usecases.NewCustomerUsecase))
 }
 
-func ProvideSubscriptionEventsAdapter(pubSubClient *PubSub.Client, cfg *config.Config) *broker.SubscriptionEventsAdapter {
-	return broker.NewSubscriptionEventsAdapter(pubSubClient, cfg.SubscriptionTopicId, cfg.SubscriptionSubName, cfg.SubscriptionCreateFreeTrialEndpoint, cfg.SubscriptionServiceApiKey)
+func ProvideFirebaseAuthAdapter(client *auth.Client) *adapters.FirebaseAuthAdapter {
+	panic(wire.Build(adapters.NewFirebaseAuthAdapter))
 }
 
-func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
+func ProvideFirebaseAuthClient(cfg *Config) *auth.Client {
+	client, err := gcpclient.NewFirebaseClient(cfg.GcpProjectId, cfg.GoogleApplicationCredentials)
+	if err != nil {
+		panic(err)
+	}
+	return client
+}
+
+func ProvideFirestoreClient(cfg *Config) *firestore.Client {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, cfg.GcpProjectId)
 	if err != nil {
@@ -74,27 +100,28 @@ func ProvideFirestoreClient(cfg *config.Config) *firestore.Client {
 	return client
 }
 
-func ProvideFireCustomerRepo(client *firestore.Client) *fire.CustomerRepo {
-	panic(wire.Build(fire.NewCustomerRepo))
+func ProvideFirestoreCustomerRepo(client *firestore.Client) *adapters.FirestoreCustomerRepo {
+	panic(wire.Build(adapters.NewFirestoreCustomerRepo))
 }
 
-func ProvidePubSubClient(cfg *config.Config) *PubSub.Client {
-	client, err := PubSub.NewClientWithAuth(cfg.GoogleApplicationCredentials)
+func ProvideHTTPServer(cfg *Config, log *logrus.Logger, handler *HTTPServer.Handler) *HTTPServer.Server {
+	return HTTPServer.NewHTTPServer(&HTTPServer.Config{
+		Config: httpserver.Config{
+			Host: cfg.Host,
+			Port: cfg.Port,
+		},
+		Mode: cfg.Mode,
+	}, log, handler)
+}
+
+func ProvideHandler(log *logrus.Logger, customerUsecase HTTPServer.CustomerUsecase) *HTTPServer.Handler {
+	panic(wire.Build(HTTPServer.NewHandler))
+}
+
+func ProvideCheckmailAdapter(cfg *Config) *adapters.CheckmailAdapter {
+	checkmailAdapter, err := adapters.NewCheckmailAdapter(cfg.CheckmailServiceGRPCAddr)
 	if err != nil {
 		panic(err)
 	}
-	return client
-}
-
-func ProvideHttpServer(cfg *config.Config, log *logrus.Logger, customErrorHandler *echo.HTTPErrorHandler, customerHandler *handlers.CustomerHandler) *HttpServer.Server {
-	return HttpServer.NewServer(cfg.WebPort, log, customErrorHandler, customerHandler)
-}
-
-func ProvideCustomerHandler(log *logrus.Logger, customerUsecase handlers.CustomerUsecase) *handlers.CustomerHandler {
-	panic(wire.Build(handlers.NewCustomerHandler))
-}
-
-func ProvideEchoErrorHandler(cfg *config.Config) *echo.HTTPErrorHandler {
-	customErrorHandler := CustomErrors.NewEchoErrorHandler(cfg.Mode)
-	return &customErrorHandler
+	return checkmailAdapter
 }
