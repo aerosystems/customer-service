@@ -25,6 +25,7 @@ func InitApp() *App {
 		wire.Bind(new(usecases.SubscriptionAdapter), new(*adapters.SubscriptionAdapter)),
 		wire.Bind(new(usecases.ProjectAdapter), new(*adapters.ProjectAdapter)),
 		wire.Bind(new(usecases.FirebaseAuthAdapter), new(*adapters.FirebaseAuthAdapter)),
+		wire.Bind(new(usecases.CheckmailAdapter), new(*adapters.CheckmailAdapter)),
 		ProvideApp,
 		ProvideLogger,
 		ProvideConfig,
@@ -38,6 +39,7 @@ func InitApp() *App {
 		ProvideProjectAdapter,
 		ProvideFirebaseAuthClient,
 		ProvideFirebaseAuthAdapter,
+		ProvideCheckmailAdapter,
 	))
 }
 
@@ -73,7 +75,7 @@ func ProvideLogrusLogger(log *logger.Logger) *logrus.Logger {
 	return log.Logger
 }
 
-func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter, firebaseAuthAdapter usecases.FirebaseAuthAdapter) *usecases.CustomerUsecase {
+func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter, checkmailAdapter usecases.CheckmailAdapter, firebaseAuthAdapter usecases.FirebaseAuthAdapter) *usecases.CustomerUsecase {
 	panic(wire.Build(usecases.NewCustomerUsecase))
 }
 
@@ -114,4 +116,12 @@ func ProvideHTTPServer(cfg *Config, log *logrus.Logger, handler *HTTPServer.Hand
 
 func ProvideHandler(log *logrus.Logger, customerUsecase HTTPServer.CustomerUsecase) *HTTPServer.Handler {
 	panic(wire.Build(HTTPServer.NewHandler))
+}
+
+func ProvideCheckmailAdapter(cfg *Config) *adapters.CheckmailAdapter {
+	checkmailAdapter, err := adapters.NewCheckmailAdapter(cfg.CheckmailServiceGRPCAddr)
+	if err != nil {
+		panic(err)
+	}
+	return checkmailAdapter
 }

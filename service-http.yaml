@@ -39,6 +39,8 @@ spec:
               value: project-service-grpc-244108678816.europe-west1.run.app:443
             - name: SBS_SERVICE_GRPC_ADDR
               value: subscription-service-grpc-244108678816.europe-west1.run.app:443
+            - name: CHKML_SERVICE_GRPC_ADDR
+              value: checkmail-service-grpc-244108678816.europe-west1.run.app:443
           resources:
             limits:
               cpu: 1000m

@@ -36,14 +36,18 @@ func NewProjectAdapter(address string) (*ProjectAdapter, error) {
 	}, nil
 }
 
-func (pa ProjectAdapter) CreateDefaultProject(ctx context.Context, customerUUID uuid.UUID) (projectUUID uuid.UUID, err error) {
+func (pa ProjectAdapter) CreateDefaultProject(ctx context.Context, customerUUID uuid.UUID) (uuid.UUID, string, error) {
 	resp, err := pa.client.CreateDefaultProject(ctx, &project.CreateDefaultProjectRequest{
 		CustomerUuid: customerUUID.String(),
 	})
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
-	return uuid.Parse(resp.ProjectUuid)
+	projectUuid, err := uuid.Parse(resp.ProjectUuid)
+	if err != nil {
+		return uuid.Nil, "", err
+	}
+	return projectUuid, resp.ProjectToken, nil
 }
 
 func (pa ProjectAdapter) DeleteProject(ctx context.Context, projectUUID uuid.UUID) error {

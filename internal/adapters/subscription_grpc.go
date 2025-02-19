@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"github.com/aerosystems/common-service/gen/protobuf/subscription"
+	"github.com/aerosystems/customer-service/internal/usecases"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -36,14 +37,19 @@ func NewSubscriptionAdapter(address string) (*SubscriptionAdapter, error) {
 	}, nil
 }
 
-func (sa SubscriptionAdapter) CreateFreeTrialSubscription(ctx context.Context, customerUUID uuid.UUID) (subscriptionUUID uuid.UUID, err error) {
+func (sa SubscriptionAdapter) CreateFreeTrialSubscription(ctx context.Context, customerUUID uuid.UUID) (*usecases.SubscriptionDTO, error) {
 	resp, err := sa.client.CreateFreeTrialSubscription(ctx, &subscription.CreateFreeTrialSubscriptionRequest{
 		CustomerUuid: customerUUID.String(),
 	})
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
-	return uuid.Parse(resp.SubscriptionUuid)
+	return &usecases.SubscriptionDTO{
+		UUID:        resp.SubscriptionUuid,
+		Type:        resp.SubscriptionType,
+		AccessTime:  resp.AccessTime.AsTime(),
+		AccessCount: resp.AccessCount,
+	}, nil
 }
 
 func (sa SubscriptionAdapter) DeleteSubscription(ctx context.Context, subscriptionUUID uuid.UUID) error {

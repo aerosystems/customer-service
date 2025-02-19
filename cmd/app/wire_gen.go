@@ -30,9 +30,10 @@ func InitApp() *App {
 	firestoreCustomerRepo := ProvideFirestoreCustomerRepo(client)
 	subscriptionAdapter := ProvideSubscriptionAdapter(config)
 	projectAdapter := ProvideProjectAdapter(config)
+	checkmailAdapter := ProvideCheckmailAdapter(config)
 	authClient := ProvideFirebaseAuthClient(config)
 	firebaseAuthAdapter := ProvideFirebaseAuthAdapter(authClient)
-	customerUsecase := ProvideCustomerUsecase(logrusLogger, firestoreCustomerRepo, subscriptionAdapter, projectAdapter, firebaseAuthAdapter)
+	customerUsecase := ProvideCustomerUsecase(logrusLogger, firestoreCustomerRepo, subscriptionAdapter, projectAdapter, checkmailAdapter, firebaseAuthAdapter)
 	handler := ProvideHandler(logrusLogger, customerUsecase)
 	server := ProvideHTTPServer(config, logrusLogger, handler)
 	app := ProvideApp(logrusLogger, config, server)
@@ -54,8 +55,8 @@ func ProvideConfig() *Config {
 	return config
 }
 
-func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter, firebaseAuthAdapter usecases.FirebaseAuthAdapter) *usecases.CustomerUsecase {
-	customerUsecase := usecases.NewCustomerUsecase(log, customerRepo, subscriptionAdapter, projectAdapter, firebaseAuthAdapter)
+func ProvideCustomerUsecase(log *logrus.Logger, customerRepo usecases.CustomerRepository, subscriptionAdapter usecases.SubscriptionAdapter, projectAdapter usecases.ProjectAdapter, checkmailAdapter usecases.CheckmailAdapter, firebaseAuthAdapter usecases.FirebaseAuthAdapter) *usecases.CustomerUsecase {
+	customerUsecase := usecases.NewCustomerUsecase(log, customerRepo, subscriptionAdapter, projectAdapter, checkmailAdapter, firebaseAuthAdapter)
 	return customerUsecase
 }
 
@@ -121,4 +122,12 @@ func ProvideHTTPServer(cfg *Config, log *logrus.Logger, handler *HTTPServer.Hand
 		},
 		Mode: cfg.Mode,
 	}, log, handler)
+}
+
+func ProvideCheckmailAdapter(cfg *Config) *adapters.CheckmailAdapter {
+	checkmailAdapter, err := adapters.NewCheckmailAdapter(cfg.CheckmailServiceGRPCAddr)
+	if err != nil {
+		panic(err)
+	}
+	return checkmailAdapter
 }

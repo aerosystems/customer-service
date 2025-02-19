@@ -13,6 +13,7 @@ type CustomerUsecase struct {
 	customerRepo        CustomerRepository
 	subscriptionAdapter SubscriptionAdapter
 	projectAdapter      ProjectAdapter
+	checkmailAdapter    CheckmailAdapter
 	fireAuthAdapter     FirebaseAuthAdapter
 }
 
@@ -21,6 +22,7 @@ func NewCustomerUsecase(
 	customerRepo CustomerRepository,
 	subscriptionAdapter SubscriptionAdapter,
 	projectAdapter ProjectAdapter,
+	checkmailAdapter CheckmailAdapter,
 	fireAuthAdapter FirebaseAuthAdapter,
 ) *CustomerUsecase {
 	return &CustomerUsecase{
@@ -28,6 +30,7 @@ func NewCustomerUsecase(
 		customerRepo:        customerRepo,
 		subscriptionAdapter: subscriptionAdapter,
 		projectAdapter:      projectAdapter,
+		checkmailAdapter:    checkmailAdapter,
 		fireAuthAdapter:     fireAuthAdapter,
 	}
 }
@@ -42,18 +45,29 @@ func (cu CustomerUsecase) CreateCustomer(ctx context.Context, email, firebaseUID
 	}
 	customer = entities.NewCustomer(email, firebaseUID)
 	var subscriptionUUID, projectUUID uuid.UUID
+
 	defer func() {
 		if err != nil {
 			cu.compensationCreateCustomerError(ctx, err, customer.UUID, subscriptionUUID, projectUUID)
 		}
 	}()
-	if subscriptionUUID, err = cu.subscriptionAdapter.CreateFreeTrialSubscription(ctx, customer.UUID); err != nil {
+	subscriptionDTO, err := cu.subscriptionAdapter.CreateFreeTrialSubscription(ctx, customer.UUID)
+	if err != nil {
 		return err
 	}
-	if projectUUID, err = cu.projectAdapter.CreateDefaultProject(ctx, customer.UUID); err != nil {
+	subscriptionUUID, err = uuid.Parse(subscriptionDTO.UUID)
+	if err != nil {
+		return err
+	}
+
+	projectUUID, projectToken, err := cu.projectAdapter.CreateDefaultProject(ctx, customer.UUID)
+	if err != nil {
 		return err
 	}
 	if err = cu.customerRepo.Create(ctx, customer); err != nil {
+		return err
+	}
+	if err = cu.checkmailAdapter.CreateAccess(ctx, projectToken, subscriptionDTO); err != nil {
 		return err
 	}
 	if err = cu.fireAuthAdapter.SetCustomUserClaims(ctx, firebaseUID, customer.UUID); err != nil {

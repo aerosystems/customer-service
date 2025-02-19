@@ -15,13 +15,17 @@ type CustomerRepository interface {
 }
 
 type SubscriptionAdapter interface {
-	CreateFreeTrialSubscription(ctx context.Context, customerUUID uuid.UUID) (subscriptionUUID uuid.UUID, err error)
+	CreateFreeTrialSubscription(ctx context.Context, customerUUID uuid.UUID) (*SubscriptionDTO, error)
 	DeleteSubscription(ctx context.Context, subscriptionUUID uuid.UUID) error
 }
 
 type ProjectAdapter interface {
-	CreateDefaultProject(ctx context.Context, customerUUID uuid.UUID) (projectUUID uuid.UUID, err error)
+	CreateDefaultProject(ctx context.Context, customerUUID uuid.UUID) (uuid.UUID, string, error)
 	DeleteProject(ctx context.Context, projectUUID uuid.UUID) error
+}
+
+type CheckmailAdapter interface {
+	CreateAccess(ctx context.Context, projectToken string, subscriptionDTO *SubscriptionDTO) error
 }
 
 type FirebaseAuthAdapter interface {
