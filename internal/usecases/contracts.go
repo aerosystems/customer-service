@@ -10,7 +10,7 @@ type CustomerRepository interface {
 	GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*entities.Customer, error)
 	GetByFirebaseUID(ctx context.Context, firebaseUID string) (*entities.Customer, error)
 	Create(ctx context.Context, customer *entities.Customer) error
-	Update(ctx context.Context, customer *entities.Customer) error
+	Upsert(ctx context.Context, customer *entities.Customer) error
 	Delete(ctx context.Context, customerUUID uuid.UUID) error
 }
 

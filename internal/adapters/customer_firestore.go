@@ -118,7 +118,7 @@ func (fcr *FirestoreCustomerRepo) Create(ctx context.Context, customer *entities
 	return err
 }
 
-func (fcr *FirestoreCustomerRepo) Update(ctx context.Context, customer *entities.Customer) error {
+func (fcr *FirestoreCustomerRepo) Upsert(ctx context.Context, customer *entities.Customer) error {
 	_, err := fcr.client.Collection(customersCollectionName).Doc(customer.UUID.String()).Set(ctx, CustomerToFirestore(customer))
 	return err
 }
