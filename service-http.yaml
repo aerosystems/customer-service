@@ -32,7 +32,7 @@ spec:
             - name: MODE
               value: dev
             - name: GCP_PROJECT_ID
-              value: verifire-60d1b
+              value: verifire-454922
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /app/secret/verifire-service-account-json
             - name: PRJCT_SERVICE_GRPC_ADDR
