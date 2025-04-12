@@ -1,16 +1,18 @@
 package adapters
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/aerosystems/customer-service/internal/entities"
+	"time"
+
+	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"time"
+
+	"github.com/aerosystems/customer-service/internal/entities"
 )
 
 const (

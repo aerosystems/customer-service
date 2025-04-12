@@ -2,12 +2,14 @@ package HTTPServer
 
 import (
 	"context"
-	"github.com/aerosystems/common-service/presenters/httpserver"
+	"net/http"
+
 	"github.com/go-logrusutil/logrusutil/logctx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
-	"net/http"
+
+	"github.com/aerosystems/common-service/presenters/httpserver"
 )
 
 type Server struct {

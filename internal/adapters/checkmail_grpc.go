@@ -2,10 +2,12 @@ package adapters
 
 import (
 	"context"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/aerosystems/common-service/clients/grpcclient"
 	"github.com/aerosystems/common-service/gen/protobuf/checkmail"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type CheckmailAdapter struct {

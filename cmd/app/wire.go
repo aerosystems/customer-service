@@ -4,17 +4,19 @@
 package main
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+
+	"cloud.google.com/go/firestore"
 	"firebase.google.com/go/v4/auth"
+	"github.com/google/wire"
+	"github.com/sirupsen/logrus"
+
 	"github.com/aerosystems/common-service/clients/gcpclient"
 	"github.com/aerosystems/common-service/logger"
 	"github.com/aerosystems/common-service/presenters/httpserver"
 	"github.com/aerosystems/customer-service/internal/adapters"
 	HTTPServer "github.com/aerosystems/customer-service/internal/ports/http"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"github.com/google/wire"
-	"github.com/sirupsen/logrus"
 )
 
 //go:generate wire

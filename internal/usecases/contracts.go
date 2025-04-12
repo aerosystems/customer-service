@@ -2,8 +2,10 @@ package usecases
 
 import (
 	"context"
-	"github.com/aerosystems/customer-service/internal/entities"
+
 	"github.com/google/uuid"
+
+	"github.com/aerosystems/customer-service/internal/entities"
 )
 
 type CustomerRepository interface {

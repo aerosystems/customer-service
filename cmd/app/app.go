@@ -1,8 +1,9 @@
 package main
 
 import (
-	HTTPServer "github.com/aerosystems/customer-service/internal/ports/http"
 	"github.com/sirupsen/logrus"
+
+	HTTPServer "github.com/aerosystems/customer-service/internal/ports/http"
 )
 
 type App struct {

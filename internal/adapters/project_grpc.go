@@ -2,9 +2,11 @@ package adapters
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+
 	"github.com/aerosystems/common-service/clients/grpcclient"
 	"github.com/aerosystems/common-service/gen/protobuf/project"
-	"github.com/google/uuid"
 )
 
 type ProjectAdapter struct {

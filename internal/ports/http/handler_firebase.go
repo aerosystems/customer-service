@@ -3,9 +3,11 @@ package HTTPServer
 import (
 	"encoding/json"
 	"errors"
-	"github.com/aerosystems/customer-service/internal/entities"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+
+	"github.com/aerosystems/customer-service/internal/entities"
 )
 
 type CreateFirebaseCustomerRequest struct {

@@ -3,9 +3,11 @@ package usecases
 import (
 	"context"
 	"errors"
-	"github.com/aerosystems/customer-service/internal/entities"
+
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+
+	"github.com/aerosystems/customer-service/internal/entities"
 )
 
 type CustomerUsecase struct {

@@ -2,10 +2,12 @@ package adapters
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+
 	"github.com/aerosystems/common-service/clients/grpcclient"
 	"github.com/aerosystems/common-service/gen/protobuf/subscription"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"github.com/google/uuid"
 )
 
 type SubscriptionAdapter struct {
