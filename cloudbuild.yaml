@@ -85,6 +85,7 @@ steps:
 ############################################################################################
 substitutions:
   _APP_NAME: ${REPO_NAME}-http
+  _APP_NAME_MIGRATION: ${REPO_NAME}-migration
   _REGION: ${LOCATION}
   _IMAGE: ${LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/customer-service:${SHORT_SHA}
 ############################################################################################
