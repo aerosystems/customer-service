@@ -6,7 +6,7 @@ toolchain go1.24.1
 
 require (
 	firebase.google.com/go/v4 v4.15.2
-	github.com/aerosystems/common-service v0.0.14
+	github.com/aerosystems/common-service v0.0.15
 	github.com/go-logrusutil/logrusutil v1.1.1
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
