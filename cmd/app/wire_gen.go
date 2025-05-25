@@ -26,7 +26,6 @@ func InitApp() *App {
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
 	db := ProvideGORMPostgres(logrusLogger, config)
-	migration := ProvideMigration(db)
 	customerPostgresRepo := ProvideCustomerPostgresRepo(db)
 	subscriptionAdapter := ProvideSubscriptionAdapter(config)
 	projectAdapter := ProvideProjectAdapter(config)
@@ -36,13 +35,29 @@ func InitApp() *App {
 	customerUsecase := ProvideCustomerUsecase(logrusLogger, customerPostgresRepo, subscriptionAdapter, projectAdapter, checkmailAdapter, firebaseAuthAdapter)
 	handler := ProvideHandler(logrusLogger, customerUsecase)
 	server := ProvideHTTPServer(config, logrusLogger, handler)
-	app := ProvideApp(logrusLogger, config, migration, server)
+	app := ProvideApp(logrusLogger, config, server)
 	return app
 }
 
-func ProvideApp(log *logrus.Logger, cfg *Config, migration *adapters.Migration, httpServer *HTTPServer.Server) *App {
-	app := NewApp(log, cfg, migration, httpServer)
+//go:generate wire
+func InitAppMigration() *AppMigration {
+	logger := ProvideLogger()
+	logrusLogger := ProvideLogrusLogger(logger)
+	config := ProvideConfig()
+	db := ProvideGORMPostgres(logrusLogger, config)
+	migration := ProvideMigration(db)
+	appMigration := ProvideAppMigration(logrusLogger, config, migration)
+	return appMigration
+}
+
+func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *App {
+	app := NewApp(log, cfg, httpServer)
 	return app
+}
+
+func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *AppMigration {
+	appMigration := NewAppMigration(log, cfg, migration)
+	return appMigration
 }
 
 func ProvideMigration(db *gorm.DB) *adapters.Migration {

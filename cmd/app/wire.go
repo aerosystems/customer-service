@@ -27,7 +27,6 @@ func InitApp() *App {
 		wire.Bind(new(usecases.FirebaseAuthAdapter), new(*adapters.FirebaseAuthAdapter)),
 		wire.Bind(new(usecases.CheckmailAdapter), new(*adapters.CheckmailAdapter)),
 		ProvideApp,
-		ProvideMigration,
 		ProvideLogger,
 		ProvideConfig,
 		ProvideLogrusLogger,
@@ -44,8 +43,24 @@ func InitApp() *App {
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *Config, migration *adapters.Migration, httpServer *HTTPServer.Server) *App {
+//go:generate wire
+func InitAppMigration() *AppMigration {
+	panic(wire.Build(
+		ProvideAppMigration,
+		ProvideMigration,
+		ProvideLogger,
+		ProvideConfig,
+		ProvideLogrusLogger,
+		ProvideGORMPostgres,
+	))
+}
+
+func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *App {
 	panic(wire.Build(NewApp))
+}
+
+func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *AppMigration {
+	panic(wire.Build(NewAppMigration))
 }
 
 func ProvideSubscriptionAdapter(cfg *Config) *adapters.SubscriptionAdapter {
