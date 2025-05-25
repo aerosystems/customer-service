@@ -1,17 +1,58 @@
 steps:
+  ############################################################################################
   # Docker Build
+  ############################################################################################
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t',
             '$LOCATION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/customer-service:$SHORT_SHA', '.' ]
     id: BUILD_IMAGE
-
+  ############################################################################################
   # Docker push to Google Artifact Registry
+  ############################################################################################
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'push', '$LOCATION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/customer-service:$SHORT_SHA' ]
     id: PUSH_IMAGE
     waitFor: [ BUILD_IMAGE ]
+  ############################################################################################
+  # Create or replace the migration job in Cloud Run & run it
+  ############################################################################################
+  - name: "alpine"
+    env:
+      - "APP_NAME=${_APP_NAME_MIGRATION}"
+      - "IMAGE=${_IMAGE}"
+    script: |
+      sed -i s@%APP_NAME%@${APP_NAME}@g service-migration.yaml
+      sed -i s@%IMAGE%@${IMAGE}@g service-migration.yaml
+    id: REPLACE_YAML_VALUE_MIGRATION
+    waitFor: [ "-" ]
 
-  # Replace YAML values using envsubst
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if gcloud run jobs describe ${_APP_NAME_MIGRATION} --region=${_REGION} 2>/dev/null; then
+          gcloud run jobs delete ${_APP_NAME_MIGRATION} --region=${_REGION} --quiet
+        fi
+        gcloud run jobs replace service-migration.yaml --region=${_REGION}
+    id: CREATE_OR_REPLACE_MIGRATION_JOB
+    waitFor:
+      - REPLACE_YAML_VALUE_MIGRATION
+      - PUSH_IMAGE
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud run jobs replace service-migration.yaml --region=${_REGION}
+        gcloud run jobs execute ${_APP_NAME_MIGRATION} --region=${_REGION} --wait
+    id: RUN_MIGRATION
+    waitFor:
+      - CREATE_OR_REPLACE_MIGRATION_JOB
+  ############################################################################################
+  # Replace YAML values using envsubst for HTTP service
+  ############################################################################################
   - name: "alpine"
     env:
       - "APP_NAME=${_APP_NAME}"
@@ -20,7 +61,8 @@ steps:
       sed -i s@%APP_NAME%@${APP_NAME}@g service-http.yaml
       sed -i s@%IMAGE%@${IMAGE}@g service-http.yaml
     id: REPLACE_YAML_VALUE
-    waitFor: [ "-" ]
+    waitFor:
+      - RUN_MIGRATION
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     entrypoint: gcloud
@@ -37,17 +79,21 @@ steps:
     waitFor:
       - REPLACE_YAML_VALUE
       - PUSH_IMAGE
-
+      - RUN_MIGRATION
+############################################################################################
 # Deploy to Cloud Run
+############################################################################################
 substitutions:
   _APP_NAME: ${REPO_NAME}-http
   _REGION: ${LOCATION}
   _IMAGE: ${LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/customer-service:${SHORT_SHA}
-
+############################################################################################
 # Store images in Google Artifact Registry
+############################################################################################
 images:
   - ${_IMAGE}
-
+############################################################################################
 # Log only to Google Cloud Logging
+############################################################################################
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -17,7 +17,8 @@ spec:
         autoscaling.knative.dev/maxScale: '5'
         run.googleapis.com/execution-environment: gen2
         run.googleapis.com/client-name: cloud-console
-        run.googleapis.com/startup-cpu-boost: 'true'
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/network-interfaces: '[{"network":"default","subnetwork":"default"}]'
     spec:
       containerConcurrency: 1000
       timeoutSeconds: 300
@@ -44,6 +45,11 @@ spec:
               value: "subscription-service-grpc-490485668008.europe-west1.run.app:443"
             - name: CHKML_SERVICE_GRPC_ADDR
               value: "checkmail-service-grpc-490485668008.europe-west1.run.app:443"
+            - name: POSTGRES_DSN
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: customer-postgres-dsn
           resources:
             limits:
               cpu: 1000m
