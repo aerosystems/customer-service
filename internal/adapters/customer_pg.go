@@ -21,7 +21,7 @@ func NewCustomerPostgresRepo(db *gorm.DB) *CustomerPostgresRepo {
 	}
 }
 
-type CustomerPostgres struct {
+type Customer struct {
 	UUID        string
 	Email       string
 	FirebaseUID string
@@ -29,7 +29,7 @@ type CustomerPostgres struct {
 	DeleteAt    *time.Time
 }
 
-func (c *CustomerPostgres) ToModel() *entities.Customer {
+func (c *Customer) ToModel() *entities.Customer {
 	return &entities.Customer{
 		UUID:        uuid.MustParse(c.UUID),
 		Email:       c.Email,
@@ -38,8 +38,8 @@ func (c *CustomerPostgres) ToModel() *entities.Customer {
 	}
 }
 
-func CustomerToPostgres(customer *entities.Customer) *CustomerPostgres {
-	return &CustomerPostgres{
+func CustomerToPostgres(customer *entities.Customer) *Customer {
+	return &Customer{
 		UUID:        customer.UUID.String(),
 		Email:       customer.Email,
 		FirebaseUID: customer.FirebaseUID,
@@ -48,14 +48,14 @@ func CustomerToPostgres(customer *entities.Customer) *CustomerPostgres {
 	}
 }
 
-func (c *CustomerPostgres) BeforeCreate(tx *gorm.DB) error {
+func (c *Customer) BeforeCreate(tx *gorm.DB) error {
 	if c.UUID == "" {
 		c.UUID = uuid.New().String()
 	}
 	return nil
 }
 
-func (c *CustomerPostgres) BeforeDelete(tx *gorm.DB) error {
+func (c *Customer) BeforeDelete(tx *gorm.DB) error {
 	if c.DeleteAt == nil {
 		now := time.Now()
 		c.DeleteAt = &now
@@ -64,7 +64,7 @@ func (c *CustomerPostgres) BeforeDelete(tx *gorm.DB) error {
 }
 
 func (cr *CustomerPostgresRepo) GetByCustomerUUID(ctx context.Context, customerUUID uuid.UUID) (*entities.Customer, error) {
-	var customerPG CustomerPostgres
+	var customerPG Customer
 	result := cr.db.WithContext(ctx).First(&customerPG, "uuid = ?", customerUUID.String())
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -76,7 +76,7 @@ func (cr *CustomerPostgresRepo) GetByCustomerUUID(ctx context.Context, customerU
 }
 
 func (cr *CustomerPostgresRepo) GetByFirebaseUID(ctx context.Context, firebaseUID string) (*entities.Customer, error) {
-	var customerPG CustomerPostgres
+	var customerPG Customer
 	result := cr.db.WithContext(ctx).First(&customerPG, "firebase_uid = ?", firebaseUID)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -112,7 +112,7 @@ func (cr *CustomerPostgresRepo) Upsert(ctx context.Context, customer *entities.C
 }
 
 func (cr *CustomerPostgresRepo) Delete(ctx context.Context, customerUUID uuid.UUID) error {
-	customerPG := &CustomerPostgres{UUID: customerUUID.String()}
+	customerPG := &Customer{UUID: customerUUID.String()}
 	result := cr.db.WithContext(ctx).Delete(customerPG)
 	if result.Error != nil {
 		return result.Error

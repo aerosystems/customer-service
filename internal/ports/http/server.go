@@ -17,18 +17,16 @@ type Server struct {
 }
 
 func NewHTTPServer(
-	cfg *Config,
+	cfg *httpserver.Config,
+	debug bool,
 	log *logrus.Logger,
 	handler *Handler,
 ) *Server {
 	return &Server{
 		srv: httpserver.NewHTTPServer(
-			&httpserver.Config{
-				Host: cfg.Host,
-				Port: cfg.Port,
-			},
+			cfg,
 
-			httpserver.WithCustomErrorHandler(httpserver.NewCustomErrorHandler(cfg.Mode)),
+			httpserver.WithCustomErrorHandler(httpserver.NewCustomErrorHandler(debug)),
 
 			httpserver.WithValidator(httpserver.NewCustomValidator()),
 

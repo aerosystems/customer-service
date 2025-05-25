@@ -29,8 +29,8 @@ spec:
             - name: http1
               containerPort: 8080
           env:
-            - name: MODE
-              value: dev
+            - name: DEBUG
+              value: false
             - name: GCP_PROJECT_ID
               value: verifire-454922
             - name: GOOGLE_APPLICATION_CREDENTIALS

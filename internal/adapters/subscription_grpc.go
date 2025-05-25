@@ -14,8 +14,8 @@ type SubscriptionAdapter struct {
 	client subscription.SubscriptionServiceClient
 }
 
-func NewSubscriptionAdapter(address string) (*SubscriptionAdapter, error) {
-	conn, err := grpcclient.NewGRPCConn(address)
+func NewSubscriptionAdapter(cfg *grpcclient.Config) (*SubscriptionAdapter, error) {
+	conn, err := grpcclient.NewGRPCConn(cfg)
 	if err != nil {
 		return nil, err
 	}

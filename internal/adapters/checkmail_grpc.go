@@ -14,8 +14,8 @@ type CheckmailAdapter struct {
 	client checkmail.CheckmailServiceClient
 }
 
-func NewCheckmailAdapter(address string) (*CheckmailAdapter, error) {
-	conn, err := grpcclient.NewGRPCConn(address)
+func NewCheckmailAdapter(cfg *grpcclient.Config) (*CheckmailAdapter, error) {
+	conn, err := grpcclient.NewGRPCConn(cfg)
 	if err != nil {
 		return nil, err
 	}

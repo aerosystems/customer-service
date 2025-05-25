@@ -1,42 +1,38 @@
-package main
+package app
 
 import (
-	"github.com/spf13/viper"
-)
+	"fmt"
+	"strings"
 
-const (
-	defaultMode  = "prod"
-	defaultPort  = "8080"
-	defaultProto = "http"
+	"github.com/spf13/viper"
+
+	"github.com/aerosystems/common-service/clients/gcpclient"
+	"github.com/aerosystems/common-service/clients/gormclient"
+	"github.com/aerosystems/common-service/clients/grpcclient"
+	"github.com/aerosystems/common-service/presenters/httpserver"
 )
 
 type Config struct {
-	Mode                         string
-	Host                         string
-	Port                         string
-	Proto                        string
-	GcpProjectId                 string
-	GoogleApplicationCredentials string
-	ProjectServiceGRPCAddr       string
-	SubscriptionServiceGRPCAddr  string
-	CheckmailServiceGRPCAddr     string
+	Debug                   bool
+	HTTPServer              httpserver.Config
+	Postgres                gormclient.Config
+	ProjectServiceGRPC      grpcclient.Config
+	SubscriptionServiceGRPC grpcclient.Config
+	CheckmailServiceGRPC    grpcclient.Config
+	Firebase                gcpclient.FirebaseConfig
 }
 
 func NewConfig() *Config {
-	viper.AutomaticEnv()
-	viper.SetDefault("MODE", defaultMode)
-	viper.SetDefault("PORT", defaultPort)
-	viper.SetDefault("PROTO", defaultProto)
+	viper.Reset()
+	v := viper.NewWithOptions(viper.ExperimentalBindStruct())
 
-	return &Config{
-		Mode:                         viper.GetString("MODE"),
-		Host:                         viper.GetString("HOST"),
-		Port:                         viper.GetString("PORT"),
-		Proto:                        viper.GetString("PROTO"),
-		GcpProjectId:                 viper.GetString("GCP_PROJECT_ID"),
-		GoogleApplicationCredentials: viper.GetString("GOOGLE_APPLICATION_CREDENTIALS"),
-		ProjectServiceGRPCAddr:       viper.GetString("PRJCT_SERVICE_GRPC_ADDR"),
-		SubscriptionServiceGRPCAddr:  viper.GetString("SBS_SERVICE_GRPC_ADDR"),
-		CheckmailServiceGRPCAddr:     viper.GetString("CHKML_SERVICE_GRPC_ADDR"),
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
+
+	var cfg Config
+	if err := v.Unmarshal(&cfg); err != nil {
+		panic(fmt.Errorf("failed to unmarshal cfg: %w", err))
 	}
+
+	return &cfg
 }

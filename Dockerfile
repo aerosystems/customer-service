@@ -12,7 +12,7 @@ RUN go mod download
 COPY . ./
 # Build the binary.
 # -mod=readonly ensures immutable go.mod and go.sum in container builds.
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o server ./cmd/app
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o server ./
 
 # Build the runtime container image from scratch, copying what is needed from the previous stage.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
