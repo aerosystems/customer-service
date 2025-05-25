@@ -30,17 +30,17 @@ spec:
               containerPort: 8080
           env:
             - name: DEBUG
-              value: false
+              value: "false"
             - name: GCP_PROJECT_ID
-              value: verifire-454922
+              value: "verifire-454922"
             - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /app/secret/verifire-service-account-json
+              value: "/app/secret/verifire-service-account-json"
             - name: PRJCT_SERVICE_GRPC_ADDR
-              value: project-service-grpc-490485668008.europe-west1.run.app:443
+              value: "project-service-grpc-490485668008.europe-west1.run.app:443"
             - name: SBS_SERVICE_GRPC_ADDR
-              value: subscription-service-grpc-490485668008.europe-west1.run.app:443
+              value: "subscription-service-grpc-490485668008.europe-west1.run.app:443"
             - name: CHKML_SERVICE_GRPC_ADDR
-              value: checkmail-service-grpc-490485668008.europe-west1.run.app:443
+              value: "checkmail-service-grpc-490485668008.europe-west1.run.app:443"
           resources:
             limits:
               cpu: 1000m
