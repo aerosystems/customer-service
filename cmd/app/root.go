@@ -44,7 +44,7 @@ func runRoot(cmd *cobra.Command, args []string) {
 
 	if flags.RunHTTP {
 		group.Go(func() error {
-			return app.httpServer.Run()
+			return app.http.Run()
 		})
 	} else {
 		cancel()

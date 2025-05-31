@@ -6,20 +6,20 @@ import (
 	HTTPServer "github.com/aerosystems/customer-service/internal/ports/http"
 )
 
-type App struct {
-	log        *logrus.Logger
-	cfg        *Config
-	httpServer *HTTPServer.Server
+type Server struct {
+	log  *logrus.Logger
+	cfg  *Config
+	http *HTTPServer.Server
 }
 
-func NewApp(
+func NewServer(
 	log *logrus.Logger,
 	cfg *Config,
 	httpServer *HTTPServer.Server,
-) *App {
-	return &App{
-		log:        log,
-		cfg:        cfg,
-		httpServer: httpServer,
+) *Server {
+	return &Server{
+		log:  log,
+		cfg:  cfg,
+		http: httpServer,
 	}
 }

@@ -21,7 +21,7 @@ import (
 // Injectors from wire.go:
 
 //go:generate wire
-func InitApp() *App {
+func InitApp() *Server {
 	logger := ProvideLogger()
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
@@ -50,8 +50,8 @@ func InitAppMigration() *AppMigration {
 	return appMigration
 }
 
-func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *App {
-	app := NewApp(log, cfg, httpServer)
+func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *Server {
+	app := NewServer(log, cfg, httpServer)
 	return app
 }
 

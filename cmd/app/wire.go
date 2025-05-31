@@ -18,7 +18,7 @@ import (
 )
 
 //go:generate wire
-func InitApp() *App {
+func InitApp() *Server {
 	panic(wire.Build(
 		wire.Bind(new(HTTPServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*adapters.CustomerPostgresRepo)),
@@ -55,8 +55,8 @@ func InitAppMigration() *AppMigration {
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *App {
-	panic(wire.Build(NewApp))
+func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *Server {
+	panic(wire.Build(NewServer))
 }
 
 func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *AppMigration {
