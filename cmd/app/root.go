@@ -27,7 +27,7 @@ func Execute() {
 
 func runRoot(cmd *cobra.Command, args []string) {
 	if flags.Migration {
-		app := InitAppMigration()
+		app := InitMigrationApp()
 		if err := app.migration.Run(); err != nil {
 			app.log.Fatalf("migration failed: %v", err)
 		}
@@ -35,7 +35,7 @@ func runRoot(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	app := InitApp()
+	app := InitServerApp()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

@@ -18,7 +18,7 @@ import (
 )
 
 //go:generate wire
-func InitApp() *Server {
+func InitServerApp() *Server {
 	panic(wire.Build(
 		wire.Bind(new(HTTPServer.CustomerUsecase), new(*usecases.CustomerUsecase)),
 		wire.Bind(new(usecases.CustomerRepository), new(*adapters.CustomerPostgresRepo)),
@@ -26,7 +26,7 @@ func InitApp() *Server {
 		wire.Bind(new(usecases.ProjectAdapter), new(*adapters.ProjectAdapter)),
 		wire.Bind(new(usecases.FirebaseAuthAdapter), new(*adapters.FirebaseAuthAdapter)),
 		wire.Bind(new(usecases.CheckmailAdapter), new(*adapters.CheckmailAdapter)),
-		ProvideApp,
+		ProvideServerApp,
 		ProvideLogger,
 		ProvideConfig,
 		ProvideLogrusLogger,
@@ -44,9 +44,9 @@ func InitApp() *Server {
 }
 
 //go:generate wire
-func InitAppMigration() *Migration {
+func InitMigrationApp() *Migration {
 	panic(wire.Build(
-		ProvideAppMigration,
+		ProvideMigrationApp,
 		ProvideMigration,
 		ProvideLogger,
 		ProvideConfig,
@@ -55,11 +55,11 @@ func InitAppMigration() *Migration {
 	))
 }
 
-func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *Server {
+func ProvideServerApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *Server {
 	panic(wire.Build(NewServer))
 }
 
-func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *Migration {
+func ProvideMigrationApp(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *Migration {
 	panic(wire.Build(NewAppMigration))
 }
 

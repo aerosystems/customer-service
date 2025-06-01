@@ -21,7 +21,7 @@ func (m *Migration) Run() error {
 }
 
 func autoMigrateGORM(db *gorm.DB) error {
-	if err := db.AutoMigrate(&Customer{}); err != nil {
+	if err := db.AutoMigrate(Customer{}); err != nil {
 		return fmt.Errorf("failed to autoMigrateGORM: %v", err)
 	}
 	return nil

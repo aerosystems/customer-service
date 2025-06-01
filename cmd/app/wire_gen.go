@@ -21,7 +21,7 @@ import (
 // Injectors from wire.go:
 
 //go:generate wire
-func InitApp() *Server {
+func InitServerApp() *Server {
 	logger := ProvideLogger()
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
@@ -35,27 +35,27 @@ func InitApp() *Server {
 	customerUsecase := ProvideCustomerUsecase(logrusLogger, customerPostgresRepo, subscriptionAdapter, projectAdapter, checkmailAdapter, firebaseAuthAdapter)
 	handler := ProvideHandler(logrusLogger, customerUsecase)
 	server := ProvideHTTPServer(config, logrusLogger, handler)
-	app := ProvideApp(logrusLogger, config, server)
-	return app
+	appServer := ProvideServerApp(logrusLogger, config, server)
+	return appServer
 }
 
 //go:generate wire
-func InitAppMigration() *Migration {
+func InitMigrationApp() *Migration {
 	logger := ProvideLogger()
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
 	db := ProvideGORMPostgres(logrusLogger, config)
 	migration := ProvideMigration(db)
-	appMigration := ProvideAppMigration(logrusLogger, config, migration)
+	appMigration := ProvideMigrationApp(logrusLogger, config, migration)
 	return appMigration
 }
 
-func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *Server {
-	app := NewServer(log, cfg, httpServer)
-	return app
+func ProvideServerApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) *Server {
+	server := NewServer(log, cfg, httpServer)
+	return server
 }
 
-func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *Migration {
+func ProvideMigrationApp(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *Migration {
 	appMigration := NewAppMigration(log, cfg, migration)
 	return appMigration
 }
