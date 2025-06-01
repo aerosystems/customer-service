@@ -21,8 +21,8 @@ func (app *Server) handleSignals(ctx context.Context, cancel context.CancelFunc)
 	}
 }
 
-func (app *Server) gracefulShutdown(_ context.Context, cancel context.CancelFunc) error {
+func (app *Server) gracefulShutdown(ctx context.Context, cancel context.CancelFunc) error {
 	cancel()
 	app.log.Fatalf("app is shutting down")
-	return nil
+	return app.http.Shutdown(ctx)
 }
