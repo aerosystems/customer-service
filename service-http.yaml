@@ -33,17 +33,19 @@ spec:
           env:
             - name: DEBUG
               value: "false"
-            - name: GCP_PROJECT_ID
-              value: "verifire-454922"
             - name: HTTPSERVER_ADDR
               value: "0.0.0.0:8080"
-            - name: GOOGLE_APPLICATION_CREDENTIALS
+            - name: GCP_PROJECT_ID
+              value: "verifire-454922"
+            - name: FIREBASE_PROJECTID
+              value: "verifire-454922"
+            - name: FIREBASE_CREDENTIALSPATH
               value: "/app/secret/verifire-service-account-json"
-            - name: PRJCT_SERVICE_GRPC_ADDR
+            - name: PROJECTSERVICEGRPC_ADDR
               value: "project-service-grpc-490485668008.europe-west1.run.app:443"
-            - name: SBS_SERVICE_GRPC_ADDR
+            - name: SUBSCRIPTIONSERVICEGRPC_ADDR
               value: "subscription-service-grpc-490485668008.europe-west1.run.app:443"
-            - name: CHKML_SERVICE_GRPC_ADDR
+            - name: CHECKMAILSERVICEGRPC_ADDR
               value: "checkmail-service-grpc-490485668008.europe-west1.run.app:443"
             - name: POSTGRES_DSN
               valueFrom:

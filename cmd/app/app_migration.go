@@ -6,7 +6,7 @@ import (
 	"github.com/aerosystems/customer-service/internal/adapters"
 )
 
-type AppMigration struct {
+type Migration struct {
 	log       *logrus.Logger
 	cfg       *Config
 	migration *adapters.Migration
@@ -16,8 +16,8 @@ func NewAppMigration(
 	log *logrus.Logger,
 	cfg *Config,
 	migration *adapters.Migration,
-) *AppMigration {
-	return &AppMigration{
+) *Migration {
+	return &Migration{
 		log:       log,
 		cfg:       cfg,
 		migration: migration,

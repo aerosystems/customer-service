@@ -44,7 +44,7 @@ func InitApp() *Server {
 }
 
 //go:generate wire
-func InitAppMigration() *AppMigration {
+func InitAppMigration() *Migration {
 	panic(wire.Build(
 		ProvideAppMigration,
 		ProvideMigration,
@@ -59,7 +59,7 @@ func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) 
 	panic(wire.Build(NewServer))
 }
 
-func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *AppMigration {
+func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *Migration {
 	panic(wire.Build(NewAppMigration))
 }
 

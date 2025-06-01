@@ -40,7 +40,7 @@ func InitApp() *Server {
 }
 
 //go:generate wire
-func InitAppMigration() *AppMigration {
+func InitAppMigration() *Migration {
 	logger := ProvideLogger()
 	logrusLogger := ProvideLogrusLogger(logger)
 	config := ProvideConfig()
@@ -55,7 +55,7 @@ func ProvideApp(log *logrus.Logger, cfg *Config, httpServer *HTTPServer.Server) 
 	return app
 }
 
-func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *AppMigration {
+func ProvideAppMigration(log *logrus.Logger, cfg *Config, migration *adapters.Migration) *Migration {
 	appMigration := NewAppMigration(log, cfg, migration)
 	return appMigration
 }
