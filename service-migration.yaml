@@ -1,0 +1,35 @@
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: "%APP_NAME%"
+  labels:
+    cloud.googleapis.com/location: europe-west1
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/network-interfaces: '[{"network":"default","subnetwork":"default"}]'
+    spec:
+      taskCount: 1
+      template:
+        spec:
+          serviceAccountName: 490485668008-compute@developer.gserviceaccount.com
+          containers:
+            - name: customer-service
+              image: "%IMAGE%"
+              args: [ "--migration" ]
+              env:
+                - name: GCP_PROJECT_ID
+                  value: "verifire-454922"
+                - name: DEBUG
+                  value: "true"
+                - name: POSTGRES_DSN
+                  valueFrom:
+                    secretKeyRef:
+                      key: latest
+                      name: customer-postgres-dsn
+              resources:
+                limits:
+                  cpu: 1000m
+                  memory: 512Mi

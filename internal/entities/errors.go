@@ -1,9 +1,11 @@
 package entities
 
 import (
-	"github.com/aerosystems/common-service/customerrors"
-	"google.golang.org/grpc/codes"
 	"net/http"
+
+	"google.golang.org/grpc/codes"
+
+	"github.com/aerosystems/common-service/customerrors"
 )
 
 var (

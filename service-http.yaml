@@ -14,39 +14,50 @@ spec:
       labels:
         run.googleapis.com/startupProbeType: Default
       annotations:
-        autoscaling.knative.dev/maxScale: '100'
+        autoscaling.knative.dev/maxScale: '5'
         run.googleapis.com/execution-environment: gen2
         run.googleapis.com/client-name: cloud-console
-        run.googleapis.com/startup-cpu-boost: 'true'
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/network-interfaces: '[{"network":"default","subnetwork":"default"}]'
     spec:
       containerConcurrency: 1000
       timeoutSeconds: 300
-      serviceAccountName: 244108678816-compute@developer.gserviceaccount.com
+      serviceAccountName: 490485668008-compute@developer.gserviceaccount.com
       containers:
         - name: customer-service
           image: "%IMAGE%"
           ports:
             - name: http1
               containerPort: 8080
+          args: [ "--http" ]
           env:
-            - name: MODE
-              value: dev
+            - name: DEBUG
+              value: "false"
+            - name: HTTPSERVER_ADDR
+              value: "0.0.0.0:8080"
             - name: GCP_PROJECT_ID
-              value: verifire-60d1b
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /app/secret/verifire-60d1b-3a7b22c9842d
-            - name: PRJCT_SERVICE_GRPC_ADDR
-              value: project-service-grpc-244108678816.europe-west1.run.app:443
-            - name: SBS_SERVICE_GRPC_ADDR
-              value: subscription-service-grpc-244108678816.europe-west1.run.app:443
-            - name: CHKML_SERVICE_GRPC_ADDR
-              value: checkmail-service-grpc-244108678816.europe-west1.run.app:443
+              value: "verifire-454922"
+            - name: FIREBASE_PROJECTID
+              value: "verifire-454922"
+            - name: FIREBASE_CREDENTIALSPATH
+              value: "/app/secret/verifire-service-account-json"
+            - name: PROJECTSERVICEGRPC_ADDR
+              value: "project-service-grpc-490485668008.europe-west1.run.app:443"
+            - name: SUBSCRIPTIONSERVICEGRPC_ADDR
+              value: "subscription-service-grpc-490485668008.europe-west1.run.app:443"
+            - name: CHECKMAILSERVICEGRPC_ADDR
+              value: "checkmail-service-grpc-490485668008.europe-west1.run.app:443"
+            - name: POSTGRES_DSN
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: customer-postgres-dsn
           resources:
             limits:
               cpu: 1000m
               memory: 512Mi
           volumeMounts:
-            - name: verifire-60d1b-3a7b22c9842d
+            - name: verifire-service-account-json
               mountPath: /app/secret
           startupProbe:
             timeoutSeconds: 240
@@ -55,12 +66,12 @@ spec:
             tcpSocket:
               port: 8080
       volumes:
-        - name: verifire-60d1b-3a7b22c9842d
+        - name: verifire-service-account-json
           secret:
-            secretName: verifire-60d1b-3a7b22c9842d
+            secretName: verifire-service-account-json
             items:
               - key: latest
-                path: verifire-60d1b-3a7b22c9842d
+                path: verifire-service-account-json
   traffic:
     - percent: 100
       latestRevision: true

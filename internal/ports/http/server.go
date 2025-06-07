@@ -2,12 +2,14 @@ package HTTPServer
 
 import (
 	"context"
-	"github.com/aerosystems/common-service/presenters/httpserver"
+	"net/http"
+
 	"github.com/go-logrusutil/logrusutil/logctx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
-	"net/http"
+
+	"github.com/aerosystems/common-service/presenters/httpserver"
 )
 
 type Server struct {
@@ -15,18 +17,16 @@ type Server struct {
 }
 
 func NewHTTPServer(
-	cfg *Config,
+	cfg *httpserver.Config,
+	debug bool,
 	log *logrus.Logger,
 	handler *Handler,
 ) *Server {
 	return &Server{
 		srv: httpserver.NewHTTPServer(
-			&httpserver.Config{
-				Host: cfg.Host,
-				Port: cfg.Port,
-			},
+			cfg,
 
-			httpserver.WithCustomErrorHandler(httpserver.NewCustomErrorHandler(cfg.Mode)),
+			httpserver.WithCustomErrorHandler(httpserver.NewCustomErrorHandler(debug)),
 
 			httpserver.WithValidator(httpserver.NewCustomValidator()),
 

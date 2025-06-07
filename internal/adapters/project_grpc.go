@@ -2,17 +2,19 @@ package adapters
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+
 	"github.com/aerosystems/common-service/clients/grpcclient"
 	"github.com/aerosystems/common-service/gen/protobuf/project"
-	"github.com/google/uuid"
 )
 
 type ProjectAdapter struct {
 	client project.ProjectServiceClient
 }
 
-func NewProjectAdapter(address string) (*ProjectAdapter, error) {
-	conn, err := grpcclient.NewGRPCConn(address)
+func NewProjectAdapter(cfg *grpcclient.Config) (*ProjectAdapter, error) {
+	conn, err := grpcclient.NewGRPCConn(cfg)
 	if err != nil {
 		return nil, err
 	}

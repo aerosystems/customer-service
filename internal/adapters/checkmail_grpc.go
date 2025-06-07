@@ -2,18 +2,20 @@ package adapters
 
 import (
 	"context"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/aerosystems/common-service/clients/grpcclient"
 	"github.com/aerosystems/common-service/gen/protobuf/checkmail"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type CheckmailAdapter struct {
 	client checkmail.CheckmailServiceClient
 }
 
-func NewCheckmailAdapter(address string) (*CheckmailAdapter, error) {
-	conn, err := grpcclient.NewGRPCConn(address)
+func NewCheckmailAdapter(cfg *grpcclient.Config) (*CheckmailAdapter, error) {
+	conn, err := grpcclient.NewGRPCConn(cfg)
 	if err != nil {
 		return nil, err
 	}

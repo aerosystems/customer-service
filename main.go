@@ -1,9 +1,6 @@
 package main
 
-import (
-	"context"
-	"golang.org/x/sync/errgroup"
-)
+import "github.com/aerosystems/customer-service/cmd/app"
 
 // @title Customer Service
 // @version 1.0.1
@@ -24,22 +21,5 @@ import (
 // @schemes https
 // @BasePath /
 func main() {
-	app := InitApp()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	group, ctx := errgroup.WithContext(ctx)
-
-	group.Go(func() error {
-		return app.httpServer.Run()
-	})
-
-	group.Go(func() error {
-		return app.handleSignals(ctx, cancel)
-	})
-
-	if err := group.Wait(); err != nil {
-		app.log.Errorf("error occurred: %v", err)
-	}
+	app.Execute()
 }

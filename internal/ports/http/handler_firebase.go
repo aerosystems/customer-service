@@ -3,9 +3,11 @@ package HTTPServer
 import (
 	"encoding/json"
 	"errors"
-	"github.com/aerosystems/customer-service/internal/entities"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+
+	"github.com/aerosystems/customer-service/internal/entities"
 )
 
 type CreateFirebaseCustomerRequest struct {
@@ -30,8 +32,8 @@ type CreateCustomerFirebaseEvent struct {
 // @Tags users
 // @Accept  json
 // @Produce application/json
-// @Param raw body handlers.CreateFirebaseCustomerRequestBody true "Create user"
-// @Success 201 null
+// @Param raw body CreateFirebaseCustomerRequestBody true "Create user"
+// @Success 204
 // @Failure 400 {object} ErrorResponse
 // @Failure 422 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse

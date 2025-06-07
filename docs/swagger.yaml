@@ -1,0 +1,73 @@
+basePath: /
+definitions:
+  HTTPServer.CreateFirebaseCustomerRequestBody:
+    properties:
+      message:
+        properties:
+          data:
+            items:
+              type: integer
+            type: array
+        type: object
+      subscription:
+        type: string
+    type: object
+  HTTPServer.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: gw.verifire.dev/customer
+info:
+  contact:
+    name: Artem Kostenko
+    url: https://github.com/aerosystems
+  description: A part of microservice infrastructure, who responsible for customer
+    user entity.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  title: Customer Service
+  version: 1.0.1
+paths:
+  /v1/firebase/create-customer:
+    post:
+      consumes:
+      - application/json
+      description: Create user
+      parameters:
+      - description: Create user
+        in: body
+        name: raw
+        required: true
+        schema:
+          $ref: '#/definitions/HTTPServer.CreateFirebaseCustomerRequestBody'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPServer.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/HTTPServer.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/HTTPServer.ErrorResponse'
+      summary: Create user
+      tags:
+      - users
+schemes:
+- https
+securityDefinitions:
+  BearerAuth:
+    description: Should contain Access JWT Token, with the Bearer started
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -2,18 +2,20 @@ package adapters
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+
 	"github.com/aerosystems/common-service/clients/grpcclient"
 	"github.com/aerosystems/common-service/gen/protobuf/subscription"
 	"github.com/aerosystems/customer-service/internal/usecases"
-	"github.com/google/uuid"
 )
 
 type SubscriptionAdapter struct {
 	client subscription.SubscriptionServiceClient
 }
 
-func NewSubscriptionAdapter(address string) (*SubscriptionAdapter, error) {
-	conn, err := grpcclient.NewGRPCConn(address)
+func NewSubscriptionAdapter(cfg *grpcclient.Config) (*SubscriptionAdapter, error) {
+	conn, err := grpcclient.NewGRPCConn(cfg)
 	if err != nil {
 		return nil, err
 	}
