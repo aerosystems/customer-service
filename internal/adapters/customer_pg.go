@@ -30,7 +30,7 @@ type Customer struct {
 	DeletedAt   *time.Time `gorm:"column:deleted_at;index"` // For soft deletes
 }
 
-func (Customer) TableName() string {
+func (*Customer) TableName() string {
 	return "customers"
 }
 
