@@ -95,4 +95,5 @@ func (cu CustomerUsecase) compensationCreateCustomerError(ctx context.Context, e
 			cu.log.WithError(compErr).Errorf("Failed compensation creating customer error: %v", err)
 		}
 	}
+	// TODO: Should we delete the customer access in checkmail-service?
 }
