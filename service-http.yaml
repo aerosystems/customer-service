@@ -36,9 +36,9 @@ spec:
             - name: HTTPSERVER_ADDR
               value: "0.0.0.0:8080"
             - name: GCP_PROJECT_ID
-              value: "verifire-454922"
+              value: "verifire-396021"
             - name: FIREBASE_PROJECTID
-              value: "verifire-454922"
+              value: "verifire-396021"
             - name: FIREBASE_CREDENTIALSPATH
               value: "/app/secret/verifire-service-account-json"
             - name: PROJECTSERVICEGRPC_ADDR

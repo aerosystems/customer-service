@@ -21,7 +21,7 @@ spec:
               args: [ "--migration" ]
               env:
                 - name: GCP_PROJECT_ID
-                  value: "verifire-454922"
+                  value: "verifire-396021"
                 - name: DEBUG
                   value: "true"
                 - name: POSTGRES_DSN
