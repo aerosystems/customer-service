@@ -40,11 +40,11 @@ spec:
             - name: FIREBASE_CREDENTIALSPATH
               value: "/app/secret/verifire-service-account-json"
             - name: PROJECTSERVICEGRPC_ADDR
-              value: "project-service-grpc-490485668008.europe-west1.run.app:443"
+              value: "project-service-grpc-811007978248.europe-west1.run.app:443"
             - name: SUBSCRIPTIONSERVICEGRPC_ADDR
-              value: "subscription-service-grpc-490485668008.europe-west1.run.app:443"
+              value: "subscription-service-grpc-811007978248.europe-west1.run.app:443"
             - name: CHECKMAILSERVICEGRPC_ADDR
-              value: "checkmail-service-grpc-490485668008.europe-west1.run.app:443"
+              value: "checkmail-service-grpc-811007978248.europe-west1.run.app:443"
             - name: POSTGRES_DSN
               valueFrom:
                 secretKeyRef:
